@@ -41,6 +41,30 @@
             align-items: center;
         }
 
+        /* 主图片样式 */
+        .main-image {
+            width: 300px;
+            height: 450px;
+            object-fit: cover;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .main-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 亮色主题下的图片样式 */
+        .quote-page-container.light-theme .main-image {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .quote-page-container.light-theme .main-image:hover {
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.15);
+        }
+
         .quote-page-container h1 {
             font-size: 3em;
             font-weight: 400;
@@ -142,6 +166,7 @@
 <body>
     <div class="quote-page-container" id="container">
         <div class="welcome-text">
+            <img src="image.jpg" alt="展示图片" class="main-image">
             <h1 id="date"></h1>
             <h1 id="time"></h1>
             <script>
@@ -193,7 +218,7 @@
         function toggleTheme() {
             const container = document.getElementById('container');
             container.classList.toggle('light-theme');
-            
+
             // 保存主题偏好到本地存储
             const isLight = container.classList.contains('light-theme');
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
