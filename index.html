@@ -260,6 +260,7 @@
                 setInterval(updateDateTime, 1000);
             </script>
             <button class="text-button" onclick="toggleTheme()">切换主题</button>
+            <button class="text-button" style="right: 90px;" onclick="location.reload()">刷新</button>
         </div>
     </div>
 
@@ -284,13 +285,6 @@
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
         }
 
-        // 点击页面任意位置刷新
-        document.getElementById('container').addEventListener('click', function(e) {
-            if (e.target.classList.contains('text-button')) return;
-            if (e.target.id === 'title') return;
-            if (e.target.id === 'mainImage') return;
-            location.reload();
-        });
 
         // 图片替换功能
         const imgEl = document.getElementById('mainImage');
