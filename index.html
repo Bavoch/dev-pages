@@ -285,8 +285,8 @@
         const imgEl = document.getElementById('mainImage');
         const fileInput = document.getElementById('imageInput');
 
-        // 恢复保存的图片
-        const savedImage = localStorage.getItem('page-image');
+        // 恢复保存的图片（使用 sessionStorage 实现标签页隔离）
+        const savedImage = sessionStorage.getItem('page-image');
         if (savedImage) imgEl.src = savedImage;
 
         function replaceImage(file) {
@@ -294,7 +294,7 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 imgEl.src = e.target.result;
-                localStorage.setItem('page-image', e.target.result);
+                sessionStorage.setItem('page-image', e.target.result);
             };
             reader.readAsDataURL(file);
         }
@@ -339,10 +339,10 @@
 
         // 标题编辑保存
         const titleEl = document.getElementById('title');
-        const savedTitle = localStorage.getItem('page-title');
+        const savedTitle = sessionStorage.getItem('page-title');
         if (savedTitle) titleEl.textContent = savedTitle;
         titleEl.addEventListener('input', function() {
-            localStorage.setItem('page-title', this.textContent);
+            sessionStorage.setItem('page-title', this.textContent);
         });
 
         // 页面加载时恢复上次的主题设置
