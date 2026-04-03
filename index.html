@@ -25,6 +25,8 @@
             margin: 0;
             z-index: 9999;
             transition: all 0.3s ease;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         /* 亮色主题样式 */
@@ -43,12 +45,25 @@
 
         /* 主图片样式 */
         .main-image {
-            width: 300px;
-            height: 450px;
+            width: 80px;
+            height: 80px;
             object-fit: cover;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .main-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .main-image.drag-over {
+            outline: 2px dashed rgba(255, 255, 255, 0.5);
+            outline-offset: 2px;
+        }
+
+        .quote-page-container.light-theme .main-image.drag-over {
+            outline-color: rgba(0, 0, 0, 0.4);
         }
 
         .main-image:hover {
@@ -114,7 +129,9 @@
 
         /* 文字按钮样式 */
         .text-button {
-            margin-top: 20px !important;
+            position: absolute;
+            top: 16px;
+            right: 16px;
             padding: 5px 10px !important;
             font-size: 1em !important;
             background-color: transparent !important;
@@ -122,7 +139,7 @@
             border: none !important;
             cursor: pointer !important;
             transition: all 0.3s !important;
-            display: block !important;
+            margin: 0 !important;
         }
 
         .text-button:hover {
@@ -144,8 +161,39 @@
             font-size: 1.5em;
             font-weight: 400;
             opacity: 0.5;
+            margin-top: 0;
             margin-bottom: 0.2em;
             -webkit-font-smoothing: antialiased;
+        }
+
+        /* 标题样式 */
+        .quote-page-container #title {
+            font-size: 1.5em;
+            font-weight: 400;
+            opacity: 0.7;
+            outline: none;
+            border: 1px dashed transparent;
+            border-radius: 4px;
+            padding: 2px 8px;
+            transition: border-color 0.3s;
+            cursor: text;
+        }
+
+        .quote-page-container #title:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .quote-page-container #title:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+            opacity: 1;
+        }
+
+        .quote-page-container.light-theme #title:hover {
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        .quote-page-container.light-theme #title:focus {
+            border-color: rgba(0, 0, 0, 0.3);
         }
 
         /* 时间样式 - 突出显示 */
@@ -166,9 +214,11 @@
 <body>
     <div class="quote-page-container" id="container">
         <div class="welcome-text">
-            <img src="image.jpg" alt="展示图片" class="main-image">
-            <h1 id="date"></h1>
+            <img src="image.jpg" alt="展示图片" class="main-image" id="mainImage">
+            <input type="file" id="imageInput" accept="image/*" style="display:none">
+            <div id="title" contenteditable="true" spellcheck="false">标题</div>
             <h1 id="time"></h1>
+            <h1 id="date"></h1>
             <script>
                 function updateDateTime() {
                     const now = new Date();
@@ -209,7 +259,6 @@
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
             </script>
-            <button onclick="location.reload()">刷新页面</button>
             <button class="text-button" onclick="toggleTheme()">切换主题</button>
         </div>
     </div>
@@ -223,6 +272,78 @@
             const isLight = container.classList.contains('light-theme');
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
         }
+
+        // 点击页面任意位置刷新
+        document.getElementById('container').addEventListener('click', function(e) {
+            if (e.target.classList.contains('text-button')) return;
+            if (e.target.id === 'title') return;
+            if (e.target.id === 'mainImage') return;
+            location.reload();
+        });
+
+        // 图片替换功能
+        const imgEl = document.getElementById('mainImage');
+        const fileInput = document.getElementById('imageInput');
+
+        // 恢复保存的图片
+        const savedImage = localStorage.getItem('page-image');
+        if (savedImage) imgEl.src = savedImage;
+
+        function replaceImage(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imgEl.src = e.target.result;
+                localStorage.setItem('page-image', e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 点击选择文件
+        imgEl.addEventListener('click', function() {
+            fileInput.click();
+        });
+        fileInput.addEventListener('change', function() {
+            if (this.files[0]) replaceImage(this.files[0]);
+        });
+
+        // 粘贴图片
+        document.addEventListener('paste', function(e) {
+            const items = e.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.startsWith('image/')) {
+                    e.preventDefault();
+                    replaceImage(items[i].getAsFile());
+                    break;
+                }
+            }
+        });
+
+        // 拖拽图片
+        imgEl.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.add('drag-over');
+        });
+        imgEl.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+        });
+        imgEl.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) replaceImage(file);
+        });
+
+        // 标题编辑保存
+        const titleEl = document.getElementById('title');
+        const savedTitle = localStorage.getItem('page-title');
+        if (savedTitle) titleEl.textContent = savedTitle;
+        titleEl.addEventListener('input', function() {
+            localStorage.setItem('page-title', this.textContent);
+        });
 
         // 页面加载时恢复上次的主题设置
         document.addEventListener('DOMContentLoaded', () => {
