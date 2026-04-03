@@ -264,6 +264,17 @@
     </div>
 
     <script>
+        // 为当前标签页生成唯一 ID，追加到 URL 参数中（不影响页面显示）
+        // 每次新开标签页访问同一地址，都会自动获得不同 ID，实现数据隔离
+        (() => {
+            const url = new URL(window.location.href);
+            if (!url.searchParams.has('tab')) {
+                url.searchParams.set('tab', crypto.randomUUID().slice(0, 8));
+                history.replaceState(null, '', url.toString());
+            }
+        })();
+        const tabId = new URL(window.location.href).searchParams.get('tab');
+
         function toggleTheme() {
             const container = document.getElementById('container');
             container.classList.toggle('light-theme');
@@ -285,8 +296,8 @@
         const imgEl = document.getElementById('mainImage');
         const fileInput = document.getElementById('imageInput');
 
-        // 恢复保存的图片（使用 sessionStorage 实现标签页隔离）
-        const savedImage = sessionStorage.getItem('page-image');
+        // 恢复保存的图片（按标签页 ID 隔离）
+        const savedImage = localStorage.getItem('page-image-' + tabId);
         if (savedImage) imgEl.src = savedImage;
 
         function replaceImage(file) {
@@ -294,7 +305,7 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 imgEl.src = e.target.result;
-                sessionStorage.setItem('page-image', e.target.result);
+                localStorage.setItem('page-image-' + tabId, e.target.result);
             };
             reader.readAsDataURL(file);
         }
@@ -337,12 +348,12 @@
             if (file) replaceImage(file);
         });
 
-        // 标题编辑保存
+        // 标题编辑保存（按标签页 ID 隔离）
         const titleEl = document.getElementById('title');
-        const savedTitle = sessionStorage.getItem('page-title');
+        const savedTitle = localStorage.getItem('page-title-' + tabId);
         if (savedTitle) titleEl.textContent = savedTitle;
         titleEl.addEventListener('input', function() {
-            sessionStorage.setItem('page-title', this.textContent);
+            localStorage.setItem('page-title-' + tabId, this.textContent);
         });
 
         // 页面加载时恢复上次的主题设置
