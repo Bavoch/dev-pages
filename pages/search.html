@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="../assets/site-nav.css">
+<title>搜啦 - 搜索结果测试场景</title>
+<style>
+:root{
+  --bg:#fff; --ink:#202124; --sub:#4d5156; --faint:#70757a;
+  --blue:#1a56db; --visited:#6b21a8; --line:#ebebeb; --hl-bg:#fef3d9;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:arial,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+a{color:var(--blue);text-decoration:none}
+a:visited{color:var(--visited)}
+a:hover{text-decoration:underline}
+/* ---------- 头部 ---------- */
+.head{padding:22px 0 0}
+.head-in{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:24px}
+.logo{font-size:28px;font-weight:800;letter-spacing:.02em;cursor:pointer;user-select:none}
+.logo b:nth-child(1){color:#e05a4e}.logo b:nth-child(2){color:#f5a623}.logo b:nth-child(3){color:#1a9e6c}.logo b:nth-child(4){color:#1a56db}
+.sbox{flex:1;max-width:600px;position:relative}
+.sbox .box{display:flex;align-items:center;gap:12px;border:1px solid #dfe1e5;border-radius:999px;padding:11px 20px;transition:box-shadow .2s}
+.sbox .box:focus-within,.sbox .box:hover{box-shadow:0 2px 10px rgba(32,33,36,.18)}
+.sbox input{flex:1;border:none;outline:none;font-size:15.5px;color:var(--ink)}
+.sbox .clr{background:none;border:none;color:var(--faint);font-size:15px;cursor:pointer;display:none}
+.sbox .go{background:none;border:none;font-size:17px;cursor:pointer;color:var(--blue)}
+/* 联想 */
+.suggest{position:absolute;top:calc(100% - 8px);left:0;right:0;background:#fff;border:1px solid #dfe1e5;border-top:none;border-radius:0 0 22px 22px;box-shadow:0 6px 18px rgba(32,33,36,.16);display:none;overflow:hidden;z-index:50}
+.suggest.open{display:block}
+.suggest div{padding:9px 22px;font-size:15px;cursor:pointer;display:flex;gap:12px;align-items:center}
+.suggest div:hover,.suggest div.sel{background:#f1f3f4}
+.suggest div::before{content:"⌕";color:var(--faint)}
+/* 标签页 */
+.tabs{max-width:1120px;margin:14px auto 0;padding:0 24px 0 165px;display:flex;gap:26px;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--sub)}
+.tabs a{color:var(--sub);padding:8px 2px 11px;position:relative}
+.tabs a:hover{color:var(--blue);text-decoration:none}
+.tabs a.on{color:var(--blue);font-weight:600}
+.tabs a.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--blue);border-radius:3px 3px 0 0}
+/* ---------- 结果 ---------- */
+.body{max-width:1120px;margin:0 auto;padding:18px 24px 60px;display:grid;grid-template-columns:1fr 340px;gap:56px}
+.stats-line{color:var(--faint);font-size:12.5px;margin-bottom:22px}
+.result{max-width:630px;margin-bottom:30px;animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.r-site{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+.r-site .fav{width:26px;height:26px;border-radius:50%;background:#f1f3f4;display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--sub);border:1px solid var(--line);flex-shrink:0}
+.r-site .bc{font-size:12.5px;color:var(--sub);line-height:1.5}
+.r-site .bc b{color:var(--ink);font-weight:500;display:block}
+.result h3{font-size:19.5px;font-weight:400;line-height:1.4;margin-bottom:5px}
+.result h3 a{color:var(--blue)}
+.result .snip{color:var(--sub);font-size:13.5px;line-height:1.75;max-width:600px}
+.result .snip em{font-style:normal;background:var(--hl-bg);font-weight:600;color:var(--ink);padding:0 2px;border-radius:2px}
+.result .extra{display:flex;gap:22px;margin-top:9px;font-size:13px}
+.result .extra a{color:var(--blue)}
+.r-imgs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;max-width:520px}
+.r-imgs img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;background:#f1f3f4;transition:transform .2s;cursor:pointer}
+.r-imgs img:hover{transform:scale(1.04)}
+/* 相关搜索 */
+.related{margin:14px 0 34px;max-width:630px}
+.related h4{font-size:17px;font-weight:500;margin-bottom:14px}
+.rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rel-grid span{display:flex;align-items:center;gap:12px;background:#f1f3f4;border-radius:999px;padding:10px 20px;font-size:13.5px;color:var(--ink);cursor:pointer;transition:background .15s}
+.rel-grid span:hover{background:#e4e7ea}
+.rel-grid span::before{content:"⌕";color:var(--faint)}
+/* 分页 */
+.pager{display:flex;align-items:center;gap:4px;max-width:630px;font-size:14px}
+.pager button{min-width:38px;height:38px;border:none;background:none;color:var(--blue);font-size:14px;cursor:pointer;border-radius:8px;transition:background .15s}
+.pager button:hover{background:#f1f3f4}
+.pager button.on{color:var(--ink);font-weight:700;cursor:default;background:none}
+.pager button:disabled{color:#bdc1c6;cursor:default;background:none}
+/* 知识面板 */
+.kp{border:1px solid var(--line);border-radius:14px;overflow:hidden;align-self:start;position:sticky;top:60px}
+.kp img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#f1f3f4}
+.kp-body{padding:18px 20px}
+.kp h3{font-size:21px;font-weight:500;margin-bottom:4px}
+.kp .sub{font-size:12.5px;color:var(--faint);margin-bottom:12px}
+.kp p{font-size:13px;color:var(--sub);line-height:1.8}
+.kp .attrs{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:12.5px;line-height:2.2;color:var(--sub)}
+.kp .attrs b{color:var(--ink);font-weight:500}
+@media (max-width:920px){.body{grid-template-columns:1fr}.kp{display:none}.tabs{padding-left:24px}}
+</style>
+</head>
+<body>
+<nav id="site-nav">
+  <a class="sn-brand" href="../index.html">🧪 DEV PAGES</a>
+  <div class="sn-items">
+    <a class="sn-item" href="../index.html">新闻门户</a>
+    <a class="sn-item" href="video.html">视频流</a>
+    <a class="sn-item" href="gallery.html">图片瀑布流</a>
+    <a class="sn-item" href="admin.html">管理后台</a>
+    <a class="sn-item" href="article.html">常规网页</a>
+    <a class="sn-item" href="social.html">社交动态</a>
+    <a class="sn-item" href="shop.html">电商商城</a>
+    <a class="sn-item on" href="search.html">搜索结果</a>
+  </div>
+  <span class="sn-clock" id="sn-clock">--:--:--</span>
+</nav>
+<script src="../assets/site-nav.js"></script>
+
+<header class="head">
+  <div class="head-in">
+    <div class="logo" onclick="location.href='../index.html'"><b>搜</b><b>啦</b><b>!</b></div>
+    <div class="sbox">
+      <div class="box">
+        <input id="q" autocomplete="off" spellcheck="false">
+        <button class="clr" id="clr">✕</button>
+        <button class="go" id="go">⌕</button>
+      </div>
+      <div class="suggest" id="suggest"></div>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <a class="on">全部</a><a>图片</a><a>视频</a><a>资讯</a><a>地图</a><a>更多</a>
+  </nav>
+</header>
+
+<div class="body">
+  <main>
+    <p class="stats-line" id="statsLine"></p>
+    <div id="results"></div>
+    <div class="related">
+      <h4>相关搜索</h4>
+      <div class="rel-grid" id="related"></div>
+    </div>
+    <div class="pager" id="pager"></div>
+  </main>
+  <aside class="kp" id="kp"></aside>
+</div>
+
+<script>
+/* ================= 数据 ================= */
+const DB = [
+  {site:'juejin.cn', name:'掘金', fav:'掘', t:'如何从零开发一个浏览器插件 - 完整指南', s:'本文详细介绍了 Chrome 扩展的目录结构、manifest.json 配置、content script 注入时机，以及如何在不同网页结构下保持浮层稳定性……', extra:['开发教程','Manifest V3','实战案例']},
+  {site:'developer.chrome.com', name:'Chrome Developers', fav:'C', t:'Chrome Extensions 官方文档', s:'Build extensions to customize the browsing experience. 官方文档涵盖 extension 架构、权限声明、storage API 与消息通信……', extra:['英文文档','API 参考']},
+  {site:'zhihu.com', name:'知乎', fav:'知', t:'开发浏览器插件是一种怎样的体验？ - 知乎', s:'答主分享了三年插件开发经验：最大的挑战不是功能，而是适配千奇百怪的网页 —— 吸顶导航、无限滚动、视频弹幕层，每个都是坑……', extra:['128 个回答','高赞']},
+  {site:'mdn.mozilla.org', name:'MDN Web Docs', fav:'M', t:'Browser Extension - MDN', s:'Extensions can modify web pages, add features, and change browser behavior. 学习 WebExtension API 的最佳起点，含大量示例代码……', extra:['英文文档','Firefox 兼容']},
+  {site:'github.com', name:'GitHub', fav:'G', t:'awesome-browser-extensions: 优秀开源插件合集', s:'A curated list of awesome browser extensions. 收录 400+ 开源项目，按广告拦截、效率工具、开发者工具分类，适合学习参考……', extra:['4.2k stars','开源']},
+  {site:'segmentfault.com', name:'思否', fav:'思', t:'Manifest V3 迁移踩坑记录：Service Worker 替代 Background', s:'MV3 之后 background page 被 service worker 取代，生命周期管理成为最大痛点。本文记录了 6 个真实迁移案例与解决方案……', extra:['技术专栏','2025 更新']},
+  {site:'bilibili.com', name:'哔哩哔哩', fav:'B', t:'【教程】手把手教你写一个浏览器插件（全 8 集）', s:'从 hello world 到发布上架，覆盖 popup、options、content script、消息通信。弹幕里全是课代表笔记，适合零基础入门……', extra:['视频教程','86万播放']},
+  {site:'ruanyifeng.com', name:'阮一峰的网络日志', fav:'阮', t:'浏览器插件开发入门：以网页结构分析为起点', s:'理解 DOM 结构是插件开发的第一步。不同网站的布局差异巨大：新闻门户的高密度排版、瀑布流的无限滚动、后台系统的固定侧栏……', extra:['博客','入门']},
+  {site:'v2ex.com', name:'V2EX', fav:'V', t:'分享一个自用的网页测试工具站，模拟各种页面结构', s:'楼主自建了一组静态页面：新闻页、图片流、视频站、管理后台……专门用来验证插件在各种网页上的表现，开源免费……', extra:['开源项目','热议']},
+  {site:'web.dev', name:'web.dev', fav:'W', t:'构建高质量浏览器扩展的最佳实践', s:'性能、无障碍、隐私 —— 高质量扩展的三大支柱。文章还讨论了深色模式适配与 z-index 冲突的处理策略……', extra:['最佳实践','英文']},
+  {site:'csdn.net', name:'CSDN', fav:'C', t:'浏览器插件 content script 与页面 JS 通信的 5 种方式', s:'window.postMessage、CustomEvent、注入 script 标签……详细对比各方案的适用场景与安全性，附完整可运行代码……', extra:['技术博客','附代码']},
+  {site:'sspai.com', name:'少数派', fav:'少', t:'2025 年值得安装的 20 款浏览器插件推荐', s:'从广告拦截到稍后阅读，从截图标注到密码管理。每一款都经过长期实测，覆盖工作流全场景……', extra:['年度榜单','编辑推荐']},
+];
+const SUGGESTS = ['浏览器插件开发教程','浏览器插件 manifest v3','浏览器插件 content script','浏览器插件 深色模式适配','浏览器插件 弹窗 z-index','浏览器插件 上架流程','浏览器插件 测试页面','浏览器插件 开源项目'];
+const KP = {
+  img:'https://picsum.photos/seed/kpserp/680/383',
+  title:'浏览器扩展', sub:'Browser Extension · 软件类型',
+  desc:'浏览器扩展是一种为网页浏览器添加功能或修改其行为的软件模块。现代扩展基于 WebExtensions 架构，通过声明式配置与内容脚本注入，在不修改浏览器本体的前提下定制浏览体验。',
+  attrs:[['首次出现','2004 年（Firefox 1.0）'],['主流架构','Manifest V3'],['开发语言','HTML / CSS / JavaScript'],['分发渠道','Chrome 网上应用店等']]
+};
+
+/* ================= 状态 ================= */
+const $ = s => document.querySelector(s);
+let query = new URLSearchParams(location.search).get('q') || '浏览器插件';
+let page = 1;
+const PAGE_SIZE = 6;
+
+/* ================= 渲染 ================= */
+function hl(text, q){
+  const safe = text.replace(/</g,'&lt;');
+  if (!q) return safe;
+  const terms = q.split(/\s+/).filter(Boolean).map(t => t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  if (!terms.length) return safe;
+  return safe.replace(new RegExp('(' + terms.join('|') + ')','gi'), '<em>$1</em>');
+}
+function imgFB(img, seed){
+  img.onerror = () => { img.onerror = null;
+    img.src = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="680" height="383"><rect width="680" height="383" fill="#e8eaed"/><text x="340" y="198" fill="#9aa0a6" font-size="16" text-anchor="middle" font-family="sans-serif">图片</text></svg>`);
+  };
+}
+function render(){
+  const q = query.trim();
+  document.title = q + ' - 搜啦搜索';
+  $('#q').value = query;
+  $('#clr').style.display = query ? 'block' : 'none';
+
+  /* 排序：标题/摘要命中关键词的排前面 */
+  let list = DB.map((r, i) => ({...r, i}));
+  if (q){
+    const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    list.sort((a, b) => {
+      const score = r => terms.reduce((s,t) => s + (r.t.toLowerCase().includes(t) ? 2 : 0) + (r.s.toLowerCase().includes(t) ? 1 : 0), 0);
+      return score(b) - score(a) || a.i - b.i;
+    });
+  }
+  const total = list.length;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  page = Math.min(page, pages);
+  const rows = list.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
+  $('#statsLine').textContent =
+    `找到约 ${(total * 103417 + 284).toLocaleString()} 条结果（用时 ${(Math.random()*0.4+0.15).toFixed(2)} 秒）`;
+
+  $('#results').innerHTML = rows.map((r, idx) => `
+    <div class="result" style="animation-delay:${idx*45}ms">
+      <div class="r-site">
+        <span class="fav">${r.fav}</span>
+        <span class="bc"><b>${r.name}</b>https://${r.site} › ${r.t.slice(0,14).toLowerCase().replace(/\s/g,'-')}</span>
+      </div>
+      <h3><a href="#" onclick="return false">${hl(r.t, q)}</a></h3>
+      <p class="snip">${hl(r.s, q)}</p>
+      <div class="extra">${r.extra.map(x => `<a href="#" onclick="return false">${x}</a>`).join('')}</div>
+      ${idx === 1 ? `<div class="r-imgs">${[1,2,3,4].map(n => `<img src="https://picsum.photos/seed/serp${n}/240/180" alt="" loading="lazy">`).join('')}</div>` : ''}
+    </div>`).join('');
+  $('#results').querySelectorAll('.r-imgs img').forEach((img, i) => imgFB(img, 'serp' + (i+1)));
+
+  /* 分页 */
+  let ph = `<button ${page===1?'disabled':''} data-p="${page-1}">‹ 上一页</button>`;
+  for (let i = 1; i <= pages; i++) ph += `<button class="${i===page?'on':''}" data-p="${i}">${i}</button>`;
+  ph += `<button ${page===pages?'disabled':''} data-p="${page+1}">下一页 ›</button>`;
+  $('#pager').innerHTML = ph;
+
+  /* 相关搜索 */
+  $('#related').innerHTML = SUGGESTS.filter(s => s !== q).slice(0, 8)
+    .map(s => `<span data-q="${s}">${s}</span>`).join('');
+
+  /* 知识面板 */
+  $('#kp').innerHTML = `
+    <img src="${KP.img}" alt="">
+    <div class="kp-body">
+      <h3>${KP.title}</h3><div class="sub">${KP.sub}</div>
+      <p>${KP.desc}</p>
+      <div class="attrs">${KP.attrs.map(([k,v]) => `<div><b>${k}</b>：${v}</div>`).join('')}</div>
+    </div>`;
+  imgFB($('#kp img'), 'kp');
+
+  history.replaceState(null, '', '?q=' + encodeURIComponent(query));
+}
+
+/* ================= 交互 ================= */
+$('#pager').addEventListener('click', e => {
+  const b = e.target.closest('button[data-p]'); if (!b || b.disabled) return;
+  page = +b.dataset.p; render();
+  scrollTo({top:0, behavior:'smooth'});
+});
+$('#related').addEventListener('click', e => {
+  const s = e.target.closest('span[data-q]'); if (!s) return;
+  query = s.dataset.q; page = 1; render();
+});
+function doSearch(){
+  query = $('#q').value; page = 1;
+  closeSug(); render();
+}
+$('#go').addEventListener('click', doSearch);
+$('#q').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+$('#clr').addEventListener('click', () => { $('#q').value = ''; query = ''; page = 1; closeSug(); render(); $('#q').focus(); });
+
+/* 联想下拉 */
+const sug = $('#suggest');
+let selIdx = -1;
+function closeSug(){ sug.classList.remove('open'); selIdx = -1; }
+$('#q').addEventListener('input', () => {
+  const v = $('#q').value.trim().toLowerCase();
+  $('#clr').style.display = $('#q').value ? 'block' : 'none';
+  const hits = v ? SUGGESTS.filter(s => s.toLowerCase().includes(v) && s !== v).slice(0, 7) : [];
+  if (!hits.length){ closeSug(); return; }
+  sug.innerHTML = hits.map(h => `<div data-q="${h}">${h}</div>`).join('');
+  sug.classList.add('open');
+});
+sug.addEventListener('mousedown', e => {
+  const d = e.target.closest('div[data-q]'); if (!d) return;
+  $('#q').value = d.dataset.q; doSearch();
+});
+$('#q').addEventListener('keydown', e => {
+  const items = [...sug.querySelectorAll('div')];
+  if (!sug.classList.contains('open') || !items.length) return;
+  if (e.key === 'ArrowDown'){ e.preventDefault(); selIdx = (selIdx + 1) % items.length; }
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); selIdx = (selIdx - 1 + items.length) % items.length; }
+  else return;
+  items.forEach((it, i) => it.classList.toggle('sel', i === selIdx));
+  if (selIdx >= 0) $('#q').value = items[selIdx].dataset.q;
+});
+$('#q').addEventListener('blur', () => setTimeout(closeSug, 150));
+
+/* 标签页（视觉态 + 提示） */
+$('#tabs').addEventListener('click', e => {
+  const a = e.target.closest('a'); if (!a) return;
+  $('#tabs').querySelectorAll('a').forEach(x => x.classList.remove('on'));
+  a.classList.add('on');
+});
+
+render();
+</script>
+</body>
+</html>

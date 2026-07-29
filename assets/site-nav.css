@@ -1,0 +1,23 @@
+/* 全站场景导航条 —— 静态样式，随各页面首帧渲染，切换场景无闪动 */
+#site-nav{position:fixed;top:0;left:0;right:0;height:40px;z-index:2147483000;
+  background:#141821;border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;padding:0 14px;
+  font-family:ui-sans-serif,-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  box-shadow:0 1px 10px rgba(0,0,0,.28)}
+#site-nav .sn-brand{display:flex;align-items:center;gap:7px;height:40px;padding:0;
+  color:#e9eff8;font-size:12px;font-weight:700;letter-spacing:.1em;text-decoration:none;
+  margin-right:14px;flex-shrink:0;transition:opacity .15s}
+#site-nav .sn-brand:hover{opacity:.75}
+#site-nav .sn-items{display:flex;align-items:center;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+#site-nav .sn-items::-webkit-scrollbar{display:none}
+#site-nav a.sn-item{color:rgba(233,239,248,.58);font-size:12.5px;text-decoration:none;
+  padding:0 12px;height:40px;display:flex;align-items:center;white-space:nowrap;
+  position:relative;transition:color .15s}
+#site-nav a.sn-item:hover{color:#fff}
+#site-nav a.sn-item.on{color:#fff;font-weight:600}
+#site-nav a.sn-item.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
+  height:2px;background:#ffb454;border-radius:2px 2px 0 0}
+#site-nav .sn-clock{margin-left:auto;flex-shrink:0;color:rgba(233,239,248,.42);font-size:11.5px;
+  font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;padding-left:14px}
+/* 为固定导航条预留空间（静态生效，内容不会先顶格再下跳） */
+body{padding-top:40px}

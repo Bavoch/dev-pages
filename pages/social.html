@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="../assets/site-nav.css">
+<title>碎碎念 - 社交动态测试场景</title>
+<style>
+:root{
+  --bg:#f0f2f5; --panel:#fff; --line:#e4e6eb; --txt:#1c1e21; --sub:#65676b;
+  --pink:#e0245e; --blue:#1d9bf0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased}
+/* ---------- 三栏 ---------- */
+.layout{max-width:1220px;margin:0 auto;display:grid;grid-template-columns:250px 1fr 320px;gap:28px;padding:0 20px}
+/* 左栏 */
+.rail{position:sticky;top:40px;height:calc(100vh - 40px);padding:18px 8px;display:flex;flex-direction:column}
+.logo{font-size:24px;font-weight:800;padding:6px 14px 20px}
+.logo b{color:var(--pink)}
+.rail nav a{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:999px;font-size:16px;cursor:pointer;transition:background .18s;color:var(--txt);text-decoration:none}
+.rail nav a:hover{background:#e7e9ed}
+.rail nav a.on{font-weight:800}
+.rail nav a .ic{width:24px;text-align:center;font-size:18px}
+.rail nav a .bdg{margin-left:auto;background:var(--pink);color:#fff;font-size:11px;border-radius:999px;padding:1px 7px;font-weight:600}
+.post-btn{margin:16px 8px 0;background:var(--pink);color:#fff;border:none;border-radius:999px;padding:13px;font-size:15.5px;font-weight:700;cursor:pointer;transition:.2s}
+.post-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.me{margin-top:auto;display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:999px;cursor:pointer;transition:background .18s}
+.me:hover{background:#e7e9ed}
+/* 中栏 */
+.feed-col{padding:18px 0 60px;min-width:0}
+/* 发布器 */
+.composer{background:var(--panel);border-radius:16px;padding:16px 18px;display:flex;gap:13px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.ava{width:44px;height:44px;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:700;font-size:17px;flex-shrink:0;user-select:none}
+.composer .c-main{flex:1;min-width:0}
+.composer textarea{width:100%;border:none;outline:none;resize:none;font-size:17px;font-family:inherit;color:var(--txt);min-height:52px;padding-top:10px;background:none}
+.composer textarea::placeholder{color:var(--sub)}
+.c-bar{display:flex;align-items:center;gap:4px;border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+.c-bar .tool{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:16px;color:var(--blue);cursor:pointer;transition:background .15s}
+.c-bar .tool:hover{background:rgba(29,155,240,.1)}
+.c-bar .ring{margin-left:auto;position:relative;width:26px;height:26px}
+.c-bar .ring svg{transform:rotate(-90deg)}
+.c-bar .ring circle{fill:none;stroke-width:3}
+.c-bar .cnt{position:absolute;inset:0;display:grid;place-items:center;font-size:9.5px;color:var(--sub)}
+.c-bar .cnt.warn{color:var(--pink);font-weight:700}
+.c-bar .send{background:var(--pink);color:#fff;border:none;border-radius:999px;padding:8px 22px;font-size:14px;font-weight:700;cursor:pointer;margin-left:12px;transition:.2s}
+.c-bar .send:disabled{opacity:.45;cursor:default;transform:none}
+.c-bar .send:not(:disabled):hover{filter:brightness(1.08)}
+/* 帖子 */
+.post{background:var(--panel);border-radius:16px;padding:16px 18px;margin-top:16px;box-shadow:0 1px 2px rgba(0,0,0,.06);animation:pin .45s cubic-bezier(.2,.9,.3,1.1)}
+@keyframes pin{from{opacity:0;transform:translateY(-14px) scale(.98)}}
+.p-head{display:flex;align-items:center;gap:11px}
+.p-head .who b{font-size:15px}
+.p-head .who b .v{color:var(--blue);font-size:12px;margin-left:3px}
+.p-head .who span{display:block;font-size:13px;color:var(--sub)}
+.p-head .more{margin-left:auto;color:var(--sub);cursor:pointer;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;transition:background .15s}
+.p-head .more:hover{background:rgba(29,155,240,.1);color:var(--blue)}
+.p-body{font-size:15.5px;line-height:1.85;margin:10px 0 4px;white-space:pre-wrap;word-break:break-word}
+.p-body .tag{color:var(--blue);cursor:pointer}
+.p-body .tag:hover{text-decoration:underline}
+.p-img{margin-top:10px;border-radius:14px;overflow:hidden;background:#e4e6eb}
+.p-img img{width:100%;display:block;max-height:420px;object-fit:cover;transition:transform .4s}
+.p-img:hover img{transform:scale(1.02)}
+.p-acts{display:flex;margin-top:8px;max-width:440px;justify-content:space-between}
+.act{display:flex;align-items:center;gap:7px;color:var(--sub);font-size:13.5px;cursor:pointer;padding:7px 12px;border-radius:999px;transition:.15s;user-select:none}
+.act .ic{font-size:16px;transition:transform .2s}
+.act.reply:hover{color:var(--blue);background:rgba(29,155,240,.1)}
+.act.rt:hover{color:#17a34a;background:rgba(23,163,74,.1)}
+.act.lk:hover{color:var(--pink);background:rgba(224,36,94,.1)}
+.act.lk.on{color:var(--pink)}
+.act.lk.on .ic{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{40%{transform:scale(1.55)}}
+.act.sh:hover{color:var(--blue);background:rgba(29,155,240,.1)}
+/* 右栏 */
+.side{padding:18px 0 60px}
+.s-card{background:var(--panel);border-radius:16px;padding:14px 16px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.s-search{display:flex;align-items:center;gap:10px;background:#e7e9ed;border-radius:999px;padding:10px 16px}
+.s-search input{flex:1;border:none;outline:none;background:none;font-size:14px}
+.s-card h3{font-size:17px;font-weight:800;margin-bottom:6px}
+.trend{padding:11px 4px;border-radius:10px;cursor:pointer;transition:background .15s}
+.trend:hover{background:var(--bg)}
+.trend .cat{font-size:12px;color:var(--sub)}
+.trend .tp{font-size:15px;font-weight:700;margin:2px 0}
+.trend .cnt{font-size:12.5px;color:var(--sub)}
+.f-item{display:flex;align-items:center;gap:11px;padding:10px 4px}
+.f-item .who{flex:1;min-width:0}
+.f-item .who b{font-size:14.5px;display:block}
+.f-item .who span{font-size:13px;color:var(--sub)}
+.f-btn{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+.f-btn:hover{border-color:var(--txt)}
+.f-btn.on{background:var(--bg);color:var(--sub)}
+.side .fine{font-size:12px;color:var(--sub);padding:0 8px;line-height:2}
+/* 加载提示 */
+.end-tip{text-align:center;color:var(--sub);font-size:13px;padding:26px 0;letter-spacing:.15em}
+@media (max-width:1080px){.layout{grid-template-columns:80px 1fr 300px}.rail nav a span,.logo,.post-btn,.me .who{display:none}.rail nav a{justify-content:center}}
+@media (max-width:860px){.layout{grid-template-columns:1fr}.rail,.side{display:none}}
+</style>
+</head>
+<body>
+<nav id="site-nav">
+  <a class="sn-brand" href="../index.html">🧪 DEV PAGES</a>
+  <div class="sn-items">
+    <a class="sn-item" href="../index.html">新闻门户</a>
+    <a class="sn-item" href="video.html">视频流</a>
+    <a class="sn-item" href="gallery.html">图片瀑布流</a>
+    <a class="sn-item" href="admin.html">管理后台</a>
+    <a class="sn-item" href="article.html">常规网页</a>
+    <a class="sn-item on" href="social.html">社交动态</a>
+    <a class="sn-item" href="shop.html">电商商城</a>
+    <a class="sn-item" href="search.html">搜索结果</a>
+  </div>
+  <span class="sn-clock" id="sn-clock">--:--:--</span>
+</nav>
+<script src="../assets/site-nav.js"></script>
+
+<div class="layout">
+  <aside class="rail">
+    <div class="logo">碎碎<b>念</b></div>
+    <nav>
+      <a class="on"><span class="ic">⌂</span><span>首页</span></a>
+      <a><span class="ic">＃</span><span>探索</span></a>
+      <a><span class="ic">🔔</span><span>通知</span><span class="bdg">5</span></a>
+      <a><span class="ic">✉</span><span>私信</span></a>
+      <a><span class="ic">☺</span><span>我的</span></a>
+    </nav>
+    <button class="post-btn" onclick="document.getElementById('cText').focus()">发布动态</button>
+    <div class="me">
+      <span class="ava" style="background:linear-gradient(135deg,#e0245e,#ff7ab8)">测</span>
+      <div class="who"><b style="font-size:14.5px">测试员小周</b><span style="font-size:13px;color:var(--sub)">@tester_zhou</span></div>
+    </div>
+  </aside>
+
+  <main class="feed-col">
+    <div class="composer">
+      <span class="ava" style="background:linear-gradient(135deg,#e0245e,#ff7ab8)">测</span>
+      <div class="c-main">
+        <textarea id="cText" maxlength="280" placeholder="有什么新鲜事？"></textarea>
+        <div class="c-bar">
+          <span class="tool" title="图片">🖼</span>
+          <span class="tool" title="表情">☺</span>
+          <span class="tool" title="投票">▤</span>
+          <span class="tool" title="定位">◉</span>
+          <span class="ring"><svg width="26" height="26" viewBox="0 0 26 26">
+            <circle cx="13" cy="13" r="10" stroke="#e4e6eb"/>
+            <circle id="ringFg" cx="13" cy="13" r="10" stroke="#1d9bf0" stroke-dasharray="0 63"/>
+          </svg><span class="cnt" id="cnt">280</span></span>
+          <button class="send" id="sendBtn" disabled>发布</button>
+        </div>
+      </div>
+    </div>
+    <div id="feed"></div>
+    <div class="end-tip" id="endTip">↓ 下拉加载更多动态</div>
+  </main>
+
+  <aside class="side">
+    <div class="s-card"><div class="s-search"><span>⌕</span><input placeholder="搜索碎碎念"></div></div>
+    <div class="s-card">
+      <h3>热门话题</h3>
+      <div id="trends"></div>
+    </div>
+    <div class="s-card">
+      <h3>推荐关注</h3>
+      <div id="follows"></div>
+    </div>
+    <p class="fine">服务条款 · 隐私政策 · Cookie 设置<br>© 2025 碎碎念（插件测试场景，内容均为虚构）</p>
+  </aside>
+</div>
+
+<script>
+/* ================= 数据 ================= */
+const GRADS = ['linear-gradient(135deg,#1d9bf0,#4dd6c1)','linear-gradient(135deg,#f5a623,#e0245e)','linear-gradient(135deg,#7c6bff,#1d9bf0)','linear-gradient(135deg,#17a34a,#4dd6c1)','linear-gradient(135deg,#e0245e,#7c6bff)','linear-gradient(135deg,#f5a623,#17a34a)'];
+const POSTS = [
+  {n:'林小满', h:'@linxiaoman', v:1, t:'今天把工位搬到了窗边，下午三点的光刚好落在键盘上。突然觉得，上班这件事也不是完全不能忍。', tag:'#工位改造', img:'sp1'},
+  {n:'阿澈', h:'@ache_dev', v:1, t:'调试三小时的 bug，最后发现是少了一个分号。\n\n我现在的心情：; ; ; ; ;', tag:'#程序员日常'},
+  {n:'南山', h:'@nanshan_walk', t:'清晨六点的江边，跑步的人比车多。城市最好的样子，都在早高峰之前。', tag:'#城市漫步', img:'sp2'},
+  {n:'苏黎', h:'@suli_cooks', v:1, t:'复刻了巷口那家店的葱油拌面，第七次终于对了。秘诀：葱要炸到深琥珀色，酱油要热的。', tag:'#深夜食堂', img:'sp3'},
+  {n:'顾远', h:'@guyuan_photo', t:'胶片机到了。第一卷 36 张，废了 34 张，剩下两张意外地好。\n这大概就是胶片的浪漫吧。', tag:'#胶片摄影', img:'sp4'},
+  {n:'陈拾光', h:'@chensg', t:'地铁上看到一个小朋友在背《静夜思》，背到「低头思故乡」的时候真的低下了头。\n\n全车厢的人都笑了，是那种很温柔的笑。'},
+  {n:'白鹭', h:'@bailu_design', v:1, t:'甲方说想要「五彩斑斓的黑」，我给他做了个深色模式 + 霓虹渐变。\n\n他居然通过了。', tag:'#设计师日常'},
+  {n:'周一凡', h:'@zhouyifan', t:'把通勤路线换成了骑行的第 30 天：瘦了 4 斤，认识了 3 家早餐店老板，知道了哪条路的梧桐最先黄。', tag:'#骑行通勤', img:'sp5'},
+];
+const MORE_TEXTS = ['楼下的猫今天主动蹭了我一下，感觉赢麻了。','发现一个规律：越是不想起的早晨，窗外的天气越好。','把书架上的书按颜色排了一遍，治好了我的精神内耗（暂时的）。','第一次自己换轮胎，用了 40 分钟。省了 80 块，收获了 40 分钟的自我怀疑。','雨天的咖啡馆，窗玻璃上的水珠比 PPT 好看多了。','我妈发来一篇《震惊！这种蔬菜千万不能吃》，我回了她一个科普链接，她回了我一个「哦」。','今天的云特别像一朵西兰花。拍下来了，但你们看不到。'];
+const TRENDS = [['科技趋势','AI 编程助手','12.8万 讨论'],['热门话题','城市漫步','8.4万 讨论'],['社会热点','延迟退休','31.2万 讨论'],['文娱热搜','暑期档电影','19.6万 讨论'],['体育','马拉松赛季','5.1万 讨论']];
+const FOLLOWS = [['江晚','@jiangwan_art','插画师 · 每周三更新'],['鹿鸣','@luming_run','跑步博主 · 全马 315'],['沈星河','@shenxh','天文摄影 · 追星星的人']];
+
+/* ================= 工具 ================= */
+const $ = s => document.querySelector(s);
+function imgFB(img, seed){
+  img.onerror = () => { img.onerror = null;
+    const h = [...seed].reduce((a,c)=>a+c.charCodeAt(0),0) % 360;
+    img.src = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="420"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h},45%,72%)"/><stop offset="1" stop-color="hsl(${(h+60)%360},40%,55%)"/></linearGradient></defs><rect width="800" height="420" fill="url(#g)"/></svg>`);
+  };
+}
+function esc(s){ return s.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtT(t){
+  const m = Math.round((Date.now() - t) / 60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return m + ' 分钟';
+  if (m < 1440) return Math.round(m/60) + ' 小时';
+  return Math.round(m/1440) + ' 天';
+}
+function linkify(t){
+  return esc(t).replace(/#([^\s#，。]+)/g, '<span class="tag">#$1</span>');
+}
+
+/* ================= 渲染帖子 ================= */
+const feed = $('#feed');
+let pool = [...POSTS];
+
+function postHTML(p, idx){
+  const g = GRADS[idx % GRADS.length];
+  const liked = p.liked ? ' on' : '';
+  return `<article class="post" data-i="${idx}">
+    <div class="p-head">
+      <span class="ava" style="background:${g}">${p.n[0]}</span>
+      <div class="who"><b>${p.n}${p.v ? '<span class="v">✔</span>' : ''}</b><span>${p.h} · ${fmtT(p.time)}</span></div>
+      <span class="more">⋯</span>
+    </div>
+    <div class="p-body">${linkify(p.t)}</div>
+    ${p.img ? `<div class="p-img"><img src="https://picsum.photos/seed/${p.img}/800/420" alt="" loading="lazy"></div>` : ''}
+    <div class="p-acts">
+      <span class="act reply"><span class="ic">💬</span><b>${p.rp}</b></span>
+      <span class="act rt"><span class="ic">↻</span><b>${p.rt}</b></span>
+      <span class="act lk${liked}"><span class="ic">${p.liked ? '♥' : '♡'}</span><b>${p.lk}</b></span>
+      <span class="act sh"><span class="ic">↗</span></span>
+    </div>
+  </article>`;
+}
+function makePost(t, i){
+  return {n:['温以凡','裴野','许清欢','程既白','叶蓁蓁'][i % 5], h:'@user_' + (1000 + i), t,
+    time:Date.now() - (i+1) * 3600e3 * 2, rp:Math.floor(Math.random()*40), rt:Math.floor(Math.random()*80), lk:Math.floor(Math.random()*400)};
+}
+pool.forEach((p, i) => {
+  p.time = Date.now() - (i+1) * 3600e3 * (1.5 + Math.random());
+  p.rp = Math.floor(Math.random()*40); p.rt = Math.floor(Math.random()*80); p.lk = Math.floor(Math.random()*400);
+});
+function renderBatch(list, startIdx){
+  const frag = document.createElement('div');
+  frag.innerHTML = list.map((p, i) => postHTML(p, startIdx + i)).join('');
+  frag.querySelectorAll('img').forEach((img, i) => imgFB(img, list[i].img));
+  [...frag.children].forEach(el => feed.appendChild(el));
+}
+renderBatch(pool, 0);
+
+/* 无限滚动 */
+let extraBatch = 0;
+new IntersectionObserver(es => {
+  if (!es[0].isIntersecting) return;
+  const more = MORE_TEXTS.slice(extraBatch * 2, extraBatch * 2 + 2).map((t, i) => makePost(t, extraBatch * 2 + i));
+  if (!more.length){ $('#endTip').textContent = '— 你已经看完了全部动态 —'; return; }
+  renderBatch(more, 100 + extraBatch * 2);
+  extraBatch++;
+}, {rootMargin:'400px'}).observe($('#endTip'));
+
+/* ================= 交互 ================= */
+feed.addEventListener('click', e => {
+  const lk = e.target.closest('.act.lk');
+  if (lk){
+    const b = lk.querySelector('b'), ic = lk.querySelector('.ic');
+    const on = lk.classList.toggle('on');
+    b.textContent = +b.textContent + (on ? 1 : -1);
+    ic.textContent = on ? '♥' : '♡';
+    return;
+  }
+  const rt = e.target.closest('.act.rt');
+  if (rt){
+    const b = rt.querySelector('b');
+    b.textContent = +b.textContent + 1;
+    rt.animate([{transform:'scale(1)'},{transform:'scale(1.2)'},{transform:'scale(1)'}], {duration:280});
+    return;
+  }
+  const sh = e.target.closest('.act.sh');
+  if (sh){ sh.animate([{transform:'rotate(0)'},{transform:'rotate(20deg)'},{transform:'rotate(0)'}], {duration:300}); }
+});
+
+/* ================= 发布器 ================= */
+const cText = $('#cText'), sendBtn = $('#sendBtn'), ringFg = $('#ringFg'), cnt = $('#cnt');
+const CIRC = 2 * Math.PI * 10;
+cText.addEventListener('input', () => {
+  cText.style.height = 'auto';
+  cText.style.height = cText.scrollHeight + 'px';
+  const left = 280 - cText.value.length;
+  cnt.textContent = left <= 20 ? left : '';
+  cnt.classList.toggle('warn', left <= 20);
+  ringFg.setAttribute('stroke-dasharray', `${CIRC * cText.value.length / 280} ${CIRC}`);
+  ringFg.setAttribute('stroke', left <= 20 ? '#e0245e' : '#1d9bf0');
+  sendBtn.disabled = !cText.value.trim();
+});
+sendBtn.addEventListener('click', () => {
+  const t = cText.value.trim(); if (!t) return;
+  const p = {n:'测试员小周', h:'@tester_zhou', v:1, t, time:Date.now(), rp:0, rt:0, lk:0};
+  const div = document.createElement('div');
+  div.innerHTML = postHTML(p, 0);
+  const el = div.firstElementChild;
+  el.querySelector('img') && imgFB(el.querySelector('img'), 'me');
+  feed.prepend(el);
+  cText.value = ''; cText.dispatchEvent(new Event('input'));
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+});
+
+/* ================= 右栏 ================= */
+$('#trends').innerHTML = TRENDS.map(([c,t,n]) =>
+  `<div class="trend"><div class="cat">${c} · 热门</div><div class="tp">${t}</div><div class="cnt">${n}</div></div>`).join('');
+$('#follows').innerHTML = FOLLOWS.map(([n,h,d], i) =>
+  `<div class="f-item"><span class="ava" style="background:${GRADS[(i+2)%GRADS.length]};width:40px;height:40px;font-size:15px">${n[0]}</span>
+   <div class="who"><b>${n}</b><span>${d}</span></div>
+   <button class="f-btn">关注</button></div>`).join('');
+$('#follows').addEventListener('click', e => {
+  const b = e.target.closest('.f-btn'); if (!b) return;
+  const on = b.classList.toggle('on');
+  b.textContent = on ? '已关注' : '关注';
+});
+</script>
+</body>
+</html>

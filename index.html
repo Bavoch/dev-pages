@@ -1,362 +1,319 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <title>测试页面</title>
-    <style>
-        /* 重置特定容器内的样式 */
-        .quote-page-container {
-            all: initial;
-            /* 确保容器占满整个视口 */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            /* 基础样式 */
-            background-color: #1a1a1a;
-            color: rgba(255, 255, 255, 1);
-            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            z-index: 9999;
-            transition: all 0.3s ease;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        /* 亮色主题样式 */
-        .quote-page-container.light-theme {
-            background-color: #f5f5f5;
-            color: rgba(0, 0, 0, 0.7);
-        }
-
-        /* 所有样式都限定在容器内 */
-        .quote-page-container .welcome-text {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* 主图片样式 */
-        .main-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            margin-bottom: 20px;
-            cursor: pointer;
-        }
-
-        .main-image:hover {
-            transform: scale(1.02);
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        .main-image.drag-over {
-            outline: 2px dashed rgba(255, 255, 255, 0.5);
-            outline-offset: 2px;
-        }
-
-        .quote-page-container.light-theme .main-image.drag-over {
-            outline-color: rgba(0, 0, 0, 0.4);
-        }
-
-        .main-image:hover {
-            transform: scale(1.02);
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        /* 亮色主题下的图片样式 */
-        .quote-page-container.light-theme .main-image {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .quote-page-container.light-theme .main-image:hover {
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .quote-page-container h1 {
-            font-size: 3em;
-            font-weight: 400;
-        }
-
-        .quote-page-container p {
-            font-size: 1em;
-            font-weight: 400;
-            opacity: 0.5;
-        }
-
-        .quote-page-container button {
-            margin-top: 2em;
-            padding: 10px 20px;
-            font-size: 1em;
-            background-color: #ffffff16;
-            color: rgba(255, 255, 255, 0.7);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: fit-content;
-        }
-
-        .quote-page-container button:hover {
-            background-color: #ffffff2e;
-        }
-
-        .quote-page-container button:active {
-            background-color: #ffffff2b;
-            transform: scale(0.95);
-        }
-
-        /* 调整亮色主题下的按钮样式 */
-        .quote-page-container.light-theme button {
-            background-color: #00000016;
-            color: rgba(0, 0, 0, 0.749);
-        }
-
-        .quote-page-container.light-theme button:hover {
-            background-color: #0000002e;
-        }
-
-        .quote-page-container.light-theme button:active {
-            background-color: #0000002b;
-        }
-
-        /* 文字按钮样式 */
-        .text-button {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            padding: 5px 10px !important;
-            font-size: 1em !important;
-            background-color: transparent !important;
-            color: rgba(255, 255, 255, 0.4) !important;
-            border: none !important;
-            cursor: pointer !important;
-            transition: all 0.3s !important;
-            margin: 0 !important;
-        }
-
-        .text-button:hover {
-            color: rgba(255, 255, 255, 0.6) !important;
-            background-color: transparent !important;
-        }
-
-        /* 亮色主题下的文字按钮样式 */
-        .quote-page-container.light-theme .text-button {
-            color: rgba(0, 0, 0, 0.4) !important;
-        }
-
-        .quote-page-container.light-theme .text-button:hover {
-            color: rgba(0, 0, 0, 0.6) !important;
-        }
-
-        /* 日期样式 - 调整数字和文字的一致性 */
-        .quote-page-container #date {
-            font-size: 1.5em;
-            font-weight: 400;
-            opacity: 0.5;
-            margin-top: 0;
-            margin-bottom: 0.2em;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* 标题样式 */
-        .quote-page-container #title {
-            font-size: 1.5em;
-            font-weight: 400;
-            opacity: 0.7;
-            outline: none;
-            border: 1px dashed transparent;
-            border-radius: 4px;
-            padding: 2px 8px;
-            transition: border-color 0.3s;
-            cursor: text;
-        }
-
-        .quote-page-container #title:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .quote-page-container #title:focus {
-            border-color: rgba(255, 255, 255, 0.4);
-            opacity: 1;
-        }
-
-        .quote-page-container.light-theme #title:hover {
-            border-color: rgba(0, 0, 0, 0.15);
-        }
-
-        .quote-page-container.light-theme #title:focus {
-            border-color: rgba(0, 0, 0, 0.3);
-        }
-
-        /* 时间样式 - 突出显示 */
-        .quote-page-container #time {
-            font-size: 8em;
-            font-weight: 300;
-            opacity: 0.6;
-            margin-top: 0;
-            margin-bottom: 0;
-        }
-
-        /* 亮色主题下的特殊调整 */
-        .quote-page-container.light-theme #date {
-            opacity: 0.5;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="assets/site-nav.css">
+<title>晨间快讯 - 新闻门户测试场景</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6f4ee; --card:#fff; --ink:#1c1a17; --sub:#6b655b;
+  --red:#c21a1a; --line:#e4dfd3; --gold:#a8842c;
+  --serif:'Noto Serif SC','Songti SC','SimSun',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased}
+body.night{--paper:#14161a;--card:#1d2026;--ink:#e6e3dc;--sub:#9a958a;--line:#2c2f36;--red:#e0483f}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+/* ---------- 顶部工具条 ---------- */
+.util{border-bottom:1px solid var(--line);font-size:12.5px;color:var(--sub)}
+.util .wrap{display:flex;justify-content:space-between;height:34px;align-items:center}
+.util b{color:var(--red)}
+/* ---------- 报头 ---------- */
+.masthead{padding:22px 0 16px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+.masthead h1{font-family:var(--serif);font-size:44px;font-weight:900;letter-spacing:.06em;line-height:1}
+.masthead h1 span{color:var(--red)}
+.masthead .motto{font-size:12px;color:var(--sub);letter-spacing:.4em;margin-top:8px}
+.mast-right{text-align:right;font-size:12.5px;color:var(--sub);line-height:2}
+.mast-right b{font-family:var(--serif);font-size:15px;color:var(--ink)}
+/* ---------- 吸顶导航 ---------- */
+.cat-nav{position:sticky;top:40px;z-index:100;background:var(--red);transition:box-shadow .25s}
+body.night .cat-nav{background:#26292f}
+.cat-nav.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.25)}
+.cat-nav .wrap{display:flex;align-items:center;gap:2px;height:44px;overflow-x:auto}
+.cat-nav a{color:#fff;font-size:14.5px;padding:0 16px;height:100%;display:flex;align-items:center;position:relative;white-space:nowrap;transition:background .2s}
+.cat-nav a:hover{background:rgba(0,0,0,.15)}
+.cat-nav a.on::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:3px;background:#fff}
+/* ---------- 快讯跑马灯 ---------- */
+.ticker{background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;height:40px;overflow:hidden}
+.ticker .tag{flex-shrink:0;background:var(--red);color:#fff;font-size:12.5px;font-weight:700;padding:3px 12px;margin:0 14px;letter-spacing:.1em;clip-path:polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)}
+.ticker .rail{flex:1;overflow:hidden;position:relative;height:100%}
+.ticker .belt{position:absolute;white-space:nowrap;display:inline-flex;align-items:center;height:100%;animation:belt 36s linear infinite;font-size:13.5px;color:var(--sub)}
+.ticker:hover .belt{animation-play-state:paused}
+.ticker .belt b{color:var(--red);margin:0 6px 0 28px;font-weight:600}
+@keyframes belt{to{transform:translateX(-50%)}}
+/* ---------- 主体 ---------- */
+.main{display:grid;grid-template-columns:1fr 320px;gap:28px;padding:26px 0 10px}
+/* 头条 */
+.hero{position:relative;border-radius:6px;overflow:hidden;cursor:pointer;display:block}
+.hero img{width:100%;aspect-ratio:16/8.2;object-fit:cover;display:block;transition:transform .5s}
+.hero:hover img{transform:scale(1.03)}
+.hero .cap{position:absolute;left:0;right:0;bottom:0;padding:44px 22px 18px;background:linear-gradient(transparent,rgba(0,0,0,.82));color:#fff}
+.hero .cap h2{font-family:var(--serif);font-size:27px;font-weight:900;line-height:1.4}
+.hero .cap p{font-size:13px;opacity:.85;margin-top:8px}
+.hero .cap .live{display:inline-flex;align-items:center;gap:6px;background:var(--red);font-size:11.5px;padding:2px 10px;border-radius:2px;margin-bottom:10px}
+.hero .cap .live::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+/* 要闻列表 */
+.headline-list{margin-top:22px;border-top:2px solid var(--ink)}
+.hl{display:flex;gap:16px;padding:15px 2px;border-bottom:1px solid var(--line);align-items:flex-start;transition:background .2s;cursor:pointer}
+.hl:hover{background:var(--card)}
+.hl:hover h3{color:var(--red)}
+.hl h3{font-family:var(--serif);font-size:17.5px;font-weight:600;line-height:1.55;flex:1;transition:color .2s}
+.hl .meta{font-size:12px;color:var(--sub);margin-top:7px}
+.hl .meta em{font-style:normal;color:var(--gold)}
+.hl img{flex:0 0 132px;height:86px;object-fit:cover;border-radius:4px}
+/* 栏目 */
+.section{margin-top:34px}
+.sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--red);padding-bottom:8px;margin-bottom:6px}
+.sec-head h2{font-family:var(--serif);font-size:22px;font-weight:900}
+.sec-head span{font-size:11px;color:var(--sub);letter-spacing:.3em}
+.sec-head a{margin-left:auto;font-size:12.5px;color:var(--sub)}
+.sec-head a:hover{color:var(--red)}
+.sec-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 26px}
+.sec-item{padding:13px 0;border-bottom:1px dashed var(--line);cursor:pointer}
+.sec-item:hover h4{color:var(--red)}
+.sec-item h4{font-size:15px;font-weight:600;line-height:1.6;transition:color .2s}
+.sec-item p{font-size:12px;color:var(--sub);margin-top:5px}
+.sec-item p b{color:var(--gold);font-weight:500}
+/* ---------- 侧栏 ---------- */
+.side-card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin-bottom:20px}
+.side-card h3{font-family:var(--serif);font-size:17px;font-weight:900;padding-bottom:10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.side-card h3::before{content:"";width:4px;height:15px;background:var(--red)}
+.rank li{list-style:none;display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13.5px;cursor:pointer;align-items:baseline}
+.rank li:last-child{border:none}
+.rank li:hover span{color:var(--red)}
+.rank i{font-style:normal;font-family:var(--serif);font-weight:900;color:#b9b3a6;flex:0 0 18px}
+.rank li:nth-child(-n+3) i{color:var(--red)}
+.rank span{flex:1;line-height:1.5;transition:color .2s}
+.rank em{font-style:normal;font-size:11px;color:var(--sub)}
+/* 天气 */
+.weather{display:flex;align-items:center;gap:16px;padding:8px 0 2px}
+.weather .deg{font-family:var(--serif);font-size:42px;font-weight:900}
+.weather .info{font-size:12.5px;color:var(--sub);line-height:2}
+.weather .icon{font-size:36px;margin-left:auto;animation:float 4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-5px)}}
+/* 广告位 */
+.ad{border:1.5px dashed #c9c2b2;background:repeating-linear-gradient(45deg,transparent,transparent 12px,rgba(0,0,0,.02) 12px,rgba(0,0,0,.02) 24px);border-radius:6px;height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#a39c8c;font-size:12px;margin-bottom:20px;transition:.25s;cursor:pointer}
+body.night .ad{border-color:#3a3e46;color:#5c6068}
+.ad b{font-size:14px;letter-spacing:.2em}
+.ad:hover{border-color:var(--red);color:var(--red)}
+/* 加载更多 */
+.load-more{display:block;width:100%;margin:26px 0 8px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:4px;color:var(--sub);font-size:14px;cursor:pointer;transition:.2s}
+.load-more:hover{border-color:var(--red);color:var(--red)}
+/* 页脚 */
+footer{border-top:2px solid var(--ink);margin-top:30px;padding:24px 0 40px;font-size:12px;color:var(--sub);line-height:2.1;text-align:center}
+/* 浮动按钮 */
+.fab{position:fixed;right:18px;bottom:64px;z-index:200;width:42px;height:42px;border-radius:50%;background:var(--card);border:1px solid var(--line);color:var(--sub);font-size:16px;cursor:pointer;opacity:0;transform:translateY(10px);transition:.3s;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.fab.show{opacity:1;transform:none}
+.fab:hover{color:var(--red);border-color:var(--red)}
+.night-btn{position:fixed;right:18px;bottom:116px;z-index:200;width:42px;height:42px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:16px;cursor:pointer;transition:.25s;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.night-btn:hover{transform:rotate(20deg) scale(1.08)}
+@media (max-width:920px){
+  .main{grid-template-columns:1fr}
+  .sec-grid{grid-template-columns:1fr}
+  .masthead h1{font-size:32px}
+}
+</style>
 </head>
 <body>
-    <div class="quote-page-container" id="container">
-        <div class="welcome-text">
-            <img src="image.jpg" alt="展示图片" class="main-image" id="mainImage">
-            <input type="file" id="imageInput" accept="image/*" style="display:none">
-            <div id="title" contenteditable="true" spellcheck="false">标题</div>
-            <h1 id="time"></h1>
-            <h1 id="date"></h1>
-            <script>
-                function updateDateTime() {
-                    const now = new Date();
-                    // 修改日期格式化，使用更可靠的方式
-                    const dateOptions = {
-                        year: 'numeric',
-                        month: 'numeric',
-                        day: 'numeric'
-                    };
-                    let dateStr;
-                    try {
-                        // 首选中文格式
-                        dateStr = now.toLocaleDateString('zh-CN', dateOptions)
-                            .replace('/', '年')
-                            .replace('/', '月') + '日';
-                    } catch (e) {
-                        // 如果中文格式失败，回退到通用格式
-                        dateStr = now.toLocaleDateString('en', dateOptions)
-                            .replace(/\//g, '-');
-                    }
-                    
-                    // 修改时间格式化，添加错误处理
-                    const timeOptions = {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false // 确保使用24小时制
-                    };
-                    let timeStr;
-                    try {
-                        timeStr = now.toLocaleTimeString('zh-CN', timeOptions);
-                    } catch (e) {
-                        timeStr = now.toLocaleTimeString('en', timeOptions);
-                    }
-                    
-                    document.getElementById('date').textContent = dateStr;
-                    document.getElementById('time').textContent = timeStr;
-                }
-                updateDateTime();
-                setInterval(updateDateTime, 1000);
-            </script>
-            <button class="text-button" onclick="toggleTheme()">切换主题</button>
-            <button class="text-button" style="right: 90px;" onclick="location.reload()">刷新</button>
-        </div>
+<nav id="site-nav">
+  <a class="sn-brand" href="index.html">🧪 DEV PAGES</a>
+  <div class="sn-items">
+    <a class="sn-item on" href="index.html">新闻门户</a>
+    <a class="sn-item" href="pages/video.html">视频流</a>
+    <a class="sn-item" href="pages/gallery.html">图片瀑布流</a>
+    <a class="sn-item" href="pages/admin.html">管理后台</a>
+    <a class="sn-item" href="pages/article.html">常规网页</a>
+    <a class="sn-item" href="pages/social.html">社交动态</a>
+    <a class="sn-item" href="pages/shop.html">电商商城</a>
+    <a class="sn-item" href="pages/search.html">搜索结果</a>
+  </div>
+  <span class="sn-clock" id="sn-clock">--:--:--</span>
+</nav>
+<script src="assets/site-nav.js"></script>
+
+<div class="util"><div class="wrap">
+  <span id="today">--</span>
+  <span>今日 <b>宜测试</b> · 忌改需求</span>
+</div></div>
+
+<div class="wrap masthead">
+  <div>
+    <h1>晨间<span>快讯</span></h1>
+    <div class="motto">MORNING EXPRESS · 每一刻都值得记录</div>
+  </div>
+  <div class="mast-right">
+    <b id="clock">--:--:--</b><br>第 4217 期 · 总第 9 版
+  </div>
+</div>
+
+<nav id="nav" class="cat-nav"><div class="wrap">
+  <a class="on">首页</a><a>要闻</a><a>科技</a><a>财经</a><a>体育</a><a>文化</a><a>国际</a><a>评论</a><a>视频</a><a>专题</a>
+</div></nav>
+
+<div class="ticker">
+  <span class="tag">快讯</span>
+  <div class="rail"><div class="belt" id="belt"></div></div>
+</div>
+
+<div class="wrap main">
+  <div>
+    <a class="hero">
+      <img src="https://picsum.photos/seed/newshero/1200/620" alt="">
+      <div class="cap">
+        <span class="live">直播中</span>
+        <h2>深中通道通车一周年：大湾区「一小时生活圈」加速成形</h2>
+        <p>一年来累计通行车辆突破 3200 万车次，沿线城市产业协作项目落地超 180 个 —— 点击查看直播与专题报道</p>
+      </div>
+    </a>
+
+    <div class="headline-list" id="topList"></div>
+
+    <div class="section">
+      <div class="sec-head"><h2>科技</h2><span>TECH</span><a href="#">更多 ›</a></div>
+      <div class="sec-grid" id="secTech"></div>
     </div>
 
-    <script>
-        // 为当前标签页生成唯一 ID，追加到 URL 参数中（不影响页面显示）
-        // 每次新开标签页访问同一地址，都会自动获得不同 ID，实现数据隔离
-        (() => {
-            const url = new URL(window.location.href);
-            if (!url.searchParams.has('tab')) {
-                url.searchParams.set('tab', crypto.randomUUID().slice(0, 8));
-                history.replaceState(null, '', url.toString());
-            }
-        })();
-        const tabId = new URL(window.location.href).searchParams.get('tab');
+    <div class="section">
+      <div class="sec-head"><h2>财经</h2><span>FINANCE</span><a href="#">更多 ›</a></div>
+      <div class="sec-grid" id="secFin"></div>
+    </div>
 
-        function toggleTheme() {
-            const container = document.getElementById('container');
-            container.classList.toggle('light-theme');
+    <button class="load-more" id="loadMore">↓ 加载更多要闻</button>
+  </div>
 
-            // 保存主题偏好到本地存储
-            const isLight = container.classList.contains('light-theme');
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
-        }
+  <aside>
+    <div class="side-card">
+      <h3>今日热榜</h3>
+      <ol class="rank" id="rank"></ol>
+    </div>
+    <div class="side-card">
+      <h3>天气</h3>
+      <div class="weather">
+        <div class="deg">26°</div>
+        <div class="info">多云转晴<br>东南风 3 级 · 湿度 62%<br>空气 优</div>
+        <div class="icon">⛅</div>
+      </div>
+    </div>
+    <div class="ad"><b>广告位 A</b><span>300 × 250 · 等待投放</span></div>
+    <div class="side-card">
+      <h3>编辑荐读</h3>
+      <ol class="rank" id="reads"></ol>
+    </div>
+  </aside>
+</div>
 
+<footer>晨间快讯 · 本页面为浏览器插件测试场景，所有新闻内容均为虚构示例<br>© 2025 Morning Express · 粤 ICP 备 00000000 号</footer>
 
-        // 图片替换功能
-        const imgEl = document.getElementById('mainImage');
-        const fileInput = document.getElementById('imageInput');
+<button class="fab" id="toTop" title="回到顶部">↑</button>
+<button class="night-btn" id="nightBtn" title="夜间模式">🌙</button>
+<script>
+/* ================= 数据 ================= */
+const TICKS = [
+  ['09:41','国务院印发新一轮稳就业政策措施'],
+  ['09:28','台风「木兰」今夜登陆，沿海六市启动应急响应'],
+  ['09:02','国产大飞机 C929 完成首次全机静力试验'],
+  ['08:47','央行开展 4200 亿元逆回购操作'],
+  ['08:15','我国成功发射一箭 12 星，商业航天再提速'],
+  ['07:58','全国夏粮总产量创历史新高，同比增长 2.1%'],
+];
+const TOP = [
+  {t:'「人工智能 +」行动全面铺开：制造业迎来新一轮智能化改造浪潮', m:'要闻 · 24 分钟前 · 阅读 <em>86 万</em>', img:'n1'},
+  {t:'城市更新不搞大拆大建：老城区微改造的三种样本调查', m:'深度 · 1 小时前 · 阅读 <em>52 万</em>', img:'n2'},
+  {t:'新能源汽车下乡记：充电桩比加油站先到了镇上', m:'调查 · 2 小时前 · 阅读 <em>47 万</em>', img:'n3'},
+  {t:'延迟退休细则落地满月，灵活就业人员参保率明显上升', m:'民生 · 3 小时前 · 阅读 <em>39 万</em>', img:'n4'},
+];
+const MORE = [
+  {t:'长三角跨省通勤报告：每天 12 万人在「双城生活」', m:'数据 · 4 小时前 · 阅读 <em>31 万</em>', img:'n5'},
+  {t:'县域医疗共同体全覆盖，村卫生室也能开三甲医院的药', m:'健康 · 5 小时前 · 阅读 <em>28 万</em>', img:'n6'},
+  {t:'博物馆夜场成年轻人新宠：「下班去看展」写入城市夜经济', m:'文化 · 6 小时前 · 阅读 <em>25 万</em>', img:'n7'},
+  {t:'全国铁路今起实行新运行图，多条高铁线路压缩运行时间', m:'出行 · 7 小时前 · 阅读 <em>22 万</em>', img:'n8'},
+];
+const TECH = [
+  ['开源大模型周更盘点：推理成本一年下降 92%','<b>快评</b> · 算力自由正在成为现实'],
+  ['脑机接口临床试验获批，渐冻症患者用意念打出第一行字','<b>前沿</b> · 科技与伦理的边界再被讨论'],
+  ['固态电池量产元年？三家厂商宣布装车时间表','<b>产业</b> · 续航 1000 公里不再是 PPT'],
+  ['我国建成全球最大 5G-A 网络，低空经济基础设施提速','<b>基建</b> · 无人机物流航线突破 300 条'],
+  ['程序员平均年龄 34.2 岁：一份来自招聘平台的大数据报告','<b>职场</b> · 「35 岁焦虑」正在被数据消解'],
+  ['量子通信干线扩容，金融政务率先试点「绝对安全」传输','<b>安全</b> · 密钥分发速度提升 40 倍'],
+];
+const FIN = [
+  ['A 股三大指数集体收涨，算力板块掀涨停潮','<b>盘面</b> · 两市成交额 1.42 万亿'],
+  ['存款利率再度下调，居民「存款搬家」流向何处','<b>观察</b> · 货基与国债销售明显升温'],
+  ['跨境电商半年报：新兴市场订单增速首次超过欧美','<b>外贸</b> · 东南亚客单价同比提升 18%'],
+  ['首批 REITs 扩募落地，基础设施资产证券化提速','<b>市场</b> · 机构预计年内还有两单'],
+];
+const RANK = ['台风「木兰」最新路径发布','延迟退休细则权威解读','C929 静力试验现场直击','今年第 10 号台风命名公布','高考录取分数线汇总','暴雨橙色预警区域名单','油价调整窗口今晚开启','公积金新政十问十答','暑期档票房突破 200 亿','博物馆预约难怎么破'];
+const READS = ['一座桥改变的不只是通勤','县域经济的下一个十年','当 AI 开始写新闻','银发族的数字生活图鉴','从一碗面看城市性格'];
 
-        // 恢复保存的图片（按标签页 ID 隔离）
-        const savedImage = localStorage.getItem('page-image-' + tabId);
-        if (savedImage) imgEl.src = savedImage;
+/* ================= 渲染 ================= */
+const $ = s => document.querySelector(s);
+function imgFB(img, seed){
+  img.onerror = () => { img.onerror = null;
+    const h = [...seed].reduce((a,c)=>a+c.charCodeAt(0),0) % 360;
+    img.src = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260"><rect width="400" height="260" fill="hsl(${h},20%,78%)"/><text x="200" y="136" fill="rgba(0,0,0,.35)" font-size="15" text-anchor="middle" font-family="serif">图</text></svg>`);
+  };
+}
+/* 跑马灯（内容复制两份实现无缝） */
+const beltHTML = TICKS.map(([t,x]) => `<b>${t}</b>${x}`).join('');
+$('#belt').innerHTML = beltHTML + beltHTML;
 
-        function replaceImage(file) {
-            if (!file || !file.type.startsWith('image/')) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imgEl.src = e.target.result;
-                localStorage.setItem('page-image-' + tabId, e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
+function hlHTML(item){
+  return `<div class="hl"><h3>${item.t}<div class="meta">${item.m}</div></h3><img src="https://picsum.photos/seed/${item.img}/264/172" alt="" loading="lazy"></div>`;
+}
+$('#topList').innerHTML = TOP.map(hlHTML).join('');
+$('#topList').querySelectorAll('img').forEach((im,i)=>imgFB(im, TOP[i].img));
 
-        // 点击选择文件
-        imgEl.addEventListener('click', function() {
-            fileInput.click();
-        });
-        fileInput.addEventListener('change', function() {
-            if (this.files[0]) replaceImage(this.files[0]);
-        });
+let loaded = false;
+$('#loadMore').addEventListener('click', function(){
+  if (loaded){ this.textContent = '— 已加载全部 —'; return; }
+  loaded = true;
+  const div = document.createElement('div');
+  div.innerHTML = MORE.map(hlHTML).join('');
+  div.querySelectorAll('img').forEach((im,i)=>imgFB(im, MORE[i].img));
+  [...div.children].forEach((el,i) => {
+    el.style.opacity = 0; el.style.transform = 'translateY(10px)';
+    $('#topList').appendChild(el);
+    setTimeout(() => { el.style.transition = '.4s'; el.style.opacity = 1; el.style.transform = 'none'; }, i * 90);
+  });
+  this.textContent = '↓ 加载更多要闻';
+});
 
-        // 粘贴图片
-        document.addEventListener('paste', function(e) {
-            const items = e.clipboardData.items;
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].type.startsWith('image/')) {
-                    e.preventDefault();
-                    replaceImage(items[i].getAsFile());
-                    break;
-                }
-            }
-        });
+function secHTML(arr){ return arr.map(([t,d]) => `<div class="sec-item"><h4>${t}</h4><p>${d}</p></div>`).join(''); }
+$('#secTech').innerHTML = secHTML(TECH);
+$('#secFin').innerHTML = secHTML(FIN);
+$('#rank').innerHTML = RANK.map((t,i) => `<li><i>${i+1}</i><span>${t}</span><em>${(9-i)*3+5}万</em></li>`).join('');
+$('#reads').innerHTML = READS.map((t,i) => `<li><i>${i+1}</i><span>${t}</span></li>`).join('');
 
-        // 拖拽图片
-        imgEl.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.classList.add('drag-over');
-        });
-        imgEl.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            this.classList.remove('drag-over');
-        });
-        imgEl.addEventListener('drop', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.classList.remove('drag-over');
-            const file = e.dataTransfer.files[0];
-            if (file) replaceImage(file);
-        });
+/* ================= 时钟 / 日期 ================= */
+function tick(){
+  const n = new Date();
+  $('#clock').textContent = n.toLocaleTimeString('zh-CN', {hour12:false});
+  $('#today').textContent = n.toLocaleDateString('zh-CN', {year:'numeric', month:'long', day:'numeric', weekday:'long'});
+}
+tick(); setInterval(tick, 1000);
 
-        // 标题编辑保存（按标签页 ID 隔离）
-        const titleEl = document.getElementById('title');
-        const savedTitle = localStorage.getItem('page-title-' + tabId);
-        if (savedTitle) titleEl.textContent = savedTitle;
-        titleEl.addEventListener('input', function() {
-            localStorage.setItem('page-title-' + tabId, this.textContent);
-        });
+/* ================= 吸顶阴影 / 回顶 ================= */
+const nav = $('#nav'), toTop = $('#toTop');
+addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', scrollY > 120);
+  toTop.classList.toggle('show', scrollY > 500);
+}, {passive:true});
+toTop.addEventListener('click', () => scrollTo({top:0, behavior:'smooth'}));
 
-        // 页面加载时恢复上次的主题设置
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                document.getElementById('container').classList.add('light-theme');
-            }
-        });
-    </script>
+/* ================= 夜间模式 ================= */
+const nightBtn = $('#nightBtn');
+if (localStorage.getItem('news-night') === '1'){ document.body.classList.add('night'); nightBtn.textContent = '☀️'; }
+nightBtn.addEventListener('click', () => {
+  const on = document.body.classList.toggle('night');
+  nightBtn.textContent = on ? '☀️' : '🌙';
+  localStorage.setItem('news-night', on ? '1' : '0');
+});
+</script>
 </body>
 </html>

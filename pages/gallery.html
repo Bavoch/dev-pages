@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="../assets/site-nav.css">
+<title>灵感集 - 图片瀑布流测试场景</title>
+<style>
+:root{
+  --bg:#f2f0eb; --card:#fff; --ink:#22201c; --sub:#7a756b; --line:#e3dfd6;
+  --green:#1f7a4d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased}
+/* ---------- 顶栏 ---------- */
+.top{position:sticky;top:40px;z-index:100;background:var(--bg);border-bottom:1px solid var(--line);transition:box-shadow .25s}
+.top.scrolled{box-shadow:0 6px 20px rgba(60,50,30,.08)}
+.top-in{max-width:1360px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:22px}
+.logo{font-size:22px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.logo b{color:var(--green)}
+.search{flex:1;max-width:560px;display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:9px 18px;transition:.2s}
+.search:focus-within{border-color:var(--green);box-shadow:0 0 0 3px rgba(31,122,77,.12)}
+.search input{flex:1;border:none;outline:none;background:none;font-size:14px;color:var(--ink)}
+.top-nav{display:flex;gap:18px;font-size:14px;color:var(--sub);white-space:nowrap}
+.top-nav a{cursor:pointer;transition:color .2s}
+.top-nav a:hover,.top-nav a.on{color:var(--ink);font-weight:600}
+/* ---------- 分类 chips ---------- */
+.chips{max-width:1360px;margin:0 auto;padding:16px 22px 4px;display:flex;gap:10px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 18px;font-size:13.5px;color:var(--sub);cursor:pointer;transition:.2s}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* ---------- 瀑布流 ---------- */
+.masonry{max-width:1360px;margin:0 auto;padding:18px 22px 40px;columns:5 230px;column-gap:16px}
+.pin{break-inside:avoid;margin-bottom:16px;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 1px 3px rgba(40,35,25,.08);cursor:zoom-in;position:relative;opacity:0;transform:translateY(16px);transition:opacity .5s,transform .5s,box-shadow .25s}
+.pin.show{opacity:1;transform:none}
+.pin:hover{box-shadow:0 10px 30px rgba(40,35,25,.16)}
+.pin .ph{position:relative;overflow:hidden;background:#e8e5dd}
+.pin img{width:100%;display:block;transition:transform .45s}
+.pin:hover img{transform:scale(1.045)}
+/* 悬停操作层 */
+.pin .ov{position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.05),transparent 30%,transparent 60%,rgba(0,0,0,.45));opacity:0;transition:opacity .25s;display:flex;flex-direction:column;justify-content:space-between;padding:10px}
+.pin:hover .ov{opacity:1}
+.ov-top{display:flex;justify-content:flex-end}
+.save-btn{background:var(--green);color:#fff;border:none;border-radius:999px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+.save-btn:hover{filter:brightness(1.12)}
+.save-btn.saved{background:var(--ink)}
+.ov-bot{display:flex;justify-content:space-between;align-items:center;color:#fff;font-size:12.5px}
+.ov-bot .acts{display:flex;gap:8px}
+.ov-bot .acts span{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.92);color:#222;display:grid;place-items:center;cursor:pointer;transition:.2s;font-size:13px}
+.ov-bot .acts span:hover{transform:scale(1.12)}
+.pin .info{padding:10px 12px 12px}
+.pin .info h4{font-size:13.5px;font-weight:600;line-height:1.5}
+.pin .info .by{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:12px;color:var(--sub)}
+.pin .info .by i{width:20px;height:20px;border-radius:50%;font-style:normal;color:#fff;display:grid;place-items:center;font-size:10px;font-weight:700}
+/* ---------- 灯箱 ---------- */
+.lb{position:fixed;inset:0;z-index:500;background:rgba(15,13,10,.88);display:none;place-items:center;padding:30px}
+.lb.open{display:grid}
+.lb-card{background:var(--card);border-radius:16px;max-width:920px;width:100%;max-height:92vh;display:flex;overflow:hidden;animation:lbin .3s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes lbin{from{transform:scale(.92);opacity:0}}
+.lb-card img{flex:1;min-width:0;object-fit:contain;background:#111;max-height:92vh}
+.lb-side{flex:0 0 280px;padding:22px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.lb-side h3{font-size:17px;font-weight:700;line-height:1.5}
+.lb-side .by{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--sub)}
+.lb-side .by i{width:30px;height:30px;border-radius:50%;font-style:normal;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.lb-side p{font-size:13px;color:var(--sub);line-height:1.8}
+.lb-side .save-btn{align-self:flex-start}
+.lb-x{position:absolute;top:18px;right:22px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;border:none;font-size:18px;cursor:pointer;transition:.2s}
+.lb-x:hover{background:rgba(255,255,255,.3);transform:rotate(90deg)}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;border:none;font-size:20px;cursor:pointer;transition:.2s}
+.lb-nav:hover{background:rgba(255,255,255,.3)}
+.lb-nav.prev{left:20px}.lb-nav.next{right:20px}
+/* ---------- 其他 ---------- */
+.sentinel{height:10px}
+.loading{text-align:center;color:var(--sub);font-size:13px;padding:20px 0 50px;letter-spacing:.2em}
+.loading::after{content:"···";animation:dots 1.2s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"·"}50%{content:"··"}75%{content:"···"}}
+.toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,80px);z-index:600;background:#22201c;color:#fff;font-size:13.5px;padding:11px 24px;border-radius:999px;transition:transform .35s cubic-bezier(.2,.9,.3,1.2);pointer-events:none}
+.toast.show{transform:translate(-50%,0)}
+@media (max-width:700px){.top-nav{display:none}.lb-card{flex-direction:column}.lb-card img{max-height:55vh}.lb-side{flex:1}}
+</style>
+</head>
+<body>
+<nav id="site-nav">
+  <a class="sn-brand" href="../index.html">🧪 DEV PAGES</a>
+  <div class="sn-items">
+    <a class="sn-item" href="../index.html">新闻门户</a>
+    <a class="sn-item" href="video.html">视频流</a>
+    <a class="sn-item on" href="gallery.html">图片瀑布流</a>
+    <a class="sn-item" href="admin.html">管理后台</a>
+    <a class="sn-item" href="article.html">常规网页</a>
+    <a class="sn-item" href="social.html">社交动态</a>
+    <a class="sn-item" href="shop.html">电商商城</a>
+    <a class="sn-item" href="search.html">搜索结果</a>
+  </div>
+  <span class="sn-clock" id="sn-clock">--:--:--</span>
+</nav>
+<script src="../assets/site-nav.js"></script>
+
+<header class="top" id="top">
+  <div class="top-in">
+    <div class="logo">灵感<b>集</b></div>
+    <div class="search"><span>⌕</span><input placeholder="搜索灵感、图片、创作者"></div>
+    <div class="top-nav"><a class="on">发现</a><a>关注</a><a>创作</a><a>消息</a></div>
+  </div>
+</header>
+
+<div class="chips" id="chips"></div>
+<div class="masonry" id="masonry"></div>
+<div class="sentinel" id="sentinel"></div>
+<div class="loading" id="loading">正在加载更多灵感</div>
+
+<div class="lb" id="lb">
+  <button class="lb-x" id="lbX">✕</button>
+  <button class="lb-nav prev" id="lbPrev">‹</button>
+  <button class="lb-nav next" id="lbNext">›</button>
+  <div class="lb-card">
+    <img id="lbImg" alt="">
+    <div class="lb-side">
+      <h3 id="lbTitle"></h3>
+      <div class="by"><i id="lbAva"></i><span id="lbBy"></span></div>
+      <p id="lbDesc"></p>
+      <button class="save-btn" id="lbSave">保存到灵感板</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+/* ================= 数据 ================= */
+const CATS = ['全部','自然','城市','人文','美食','旅行','动物','设计','黑白'];
+const TITLES = {
+  '自然':['山间晨雾未散时','湖面的第一缕光','雨后森林小径','麦田尽头的云','溪谷回声','苔藓的微观宇宙'],
+  '城市':['霓虹雨夜','天桥上的晚高峰','老巷口的修表匠','写字楼的凌晨四点','地铁站台光影','屋顶上的城市'],
+  '人文':['茶馆里的下午','赶集日','巷口棋局','手艺人的工作台','节日的灯笼','窗边的阅读者'],
+  '美食':['深夜食堂的一碗面','刚出炉的可颂','街角咖啡拉花','炭火上的串','早茶蒸笼','秋天的第一杯奶茶'],
+  '旅行':['海边日落大道','雪山下的公路','沙漠星空营地','樱花隧道','渔港清晨','热气球升空前'],
+  '动物':['打哈欠的猫','雪地里的柴犬','海鸥追逐浪花','午睡的狮子','鹦鹉学说话','小鹿回头'],
+  '设计':['极简海报练习','字体排印实验','品牌配色草稿','产品渲染图','UI 组件速写','版式网格研究'],
+  '黑白':['光的形状','影子剧场','胶片质感街拍','建筑几何','雨窗','默片时代'],
+};
+const AUTHORS = ['林小满','阿澈','南山','苏黎','顾远','陈拾光','白鹭','周一凡','鹿鸣','江晚'];
+const AVA_COLORS = ['#1f7a4d','#b3543a','#3a6fb3','#a8842c','#7a4db3','#b33a6f','#2c8f8f','#8f6b2c'];
+const DESCS = ['拍摄于清晨五点，等这束光等了整整一个半小时。','原片直出，只调了白平衡。好的光线自己会说话。','系列作品的第三张，前两张在主页。','用手机拍的，设备不重要，重要的是在场。','路过时偶然抓到的瞬间，很喜欢这个构图。','调色思路放在评论区了，自取。'];
+const HEIGHTS = [300, 380, 260, 440, 340, 480, 280, 400, 320, 360];
+
+let cat = '全部', batch = 0, items = [];
+
+/* ================= 渲染 ================= */
+const masonry = document.getElementById('masonry');
+const chipsEl = document.getElementById('chips');
+
+chipsEl.innerHTML = CATS.map(c => `<button class="chip ${c===cat?'on':''}" data-c="${c}">${c}</button>`).join('');
+chipsEl.addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  cat = b.dataset.c; batch = 0; items = [];
+  chipsEl.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b));
+  masonry.innerHTML = '';
+  loadBatch();
+});
+
+function imgFB(img, seed, w, h){
+  img.onerror = () => { img.onerror = null;
+    const hue = [...seed].reduce((a,c)=>a+c.charCodeAt(0),0) % 360;
+    img.src = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${hue},35%,82%)"/><stop offset="1" stop-color="hsl(${(hue+50)%360},30%,68%)"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#g)"/></svg>`);
+  };
+}
+
+function makeItem(i){
+  const keys = Object.keys(TITLES);
+  const c = cat === '全部' ? keys[i % keys.length] : cat;
+  const list = TITLES[c];
+  const t = list[(i * 7 + batch) % list.length];
+  const seed = c + '-' + (batch * 12 + i);
+  const h = HEIGHTS[(i * 3 + batch * 5) % HEIGHTS.length];
+  const a = AUTHORS[(i + batch * 3) % AUTHORS.length];
+  return {c, t, seed, h, a, color: AVA_COLORS[(i + batch) % AVA_COLORS.length], desc: DESCS[(i + batch) % DESCS.length]};
+}
+
+function pinHTML(it, idx){
+  return `<figure class="pin" data-idx="${idx}">
+    <div class="ph">
+      <img src="https://picsum.photos/seed/${encodeURIComponent(it.seed)}/460/${it.h}" alt="${it.t}" loading="lazy" style="aspect-ratio:460/${it.h}">
+      <div class="ov">
+        <div class="ov-top"><button class="save-btn">保存</button></div>
+        <div class="ov-bot"><span>${it.c}</span><div class="acts"><span title="分享">↗</span><span title="更多">⋯</span></div></div>
+      </div>
+    </div>
+    <figcaption class="info">
+      <h4>${it.t}</h4>
+      <div class="by"><i style="background:${it.color}">${it.a[0]}</i>${it.a}</div>
+    </figcaption>
+  </figure>`;
+}
+
+function loadBatch(){
+  const frag = document.createElement('div');
+  let html = '';
+  for (let i = 0; i < 12; i++){
+    const it = makeItem(i);
+    items.push(it);
+    html += pinHTML(it, items.length - 1);
+  }
+  frag.innerHTML = html;
+  frag.querySelectorAll('img').forEach((img, i) => {
+    const it = items[items.length - 12 + i];
+    imgFB(img, it.seed, 460, it.h);
+  });
+  const pins = [...frag.children];
+  pins.forEach(p => masonry.appendChild(p));
+  /* 交错入场 */
+  requestAnimationFrame(() => pins.forEach((p, i) =>
+    setTimeout(() => p.classList.add('show'), 40 * (i % 6))));
+  batch++;
+}
+
+/* 无限滚动 */
+new IntersectionObserver(es => {
+  if (es[0].isIntersecting) loadBatch();
+}, {rootMargin:'600px'}).observe(document.getElementById('sentinel'));
+
+/* ================= 交互 ================= */
+const toast = document.getElementById('toast');
+let toastTimer;
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+masonry.addEventListener('click', e => {
+  const save = e.target.closest('.save-btn');
+  if (save){
+    e.stopPropagation();
+    save.textContent = '已保存 ✓';
+    save.classList.add('saved');
+    showToast('已保存到「默认灵感板」');
+    return;
+  }
+  const act = e.target.closest('.acts span');
+  if (act){ e.stopPropagation(); showToast(act.title === '分享' ? '链接已复制' : '操作面板（演示）'); return; }
+  const pin = e.target.closest('.pin');
+  if (pin) openLb(+pin.dataset.idx);
+});
+
+/* ================= 灯箱 ================= */
+const lb = document.getElementById('lb');
+let lbIdx = 0;
+function openLb(idx){
+  lbIdx = idx;
+  renderLb();
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function renderLb(){
+  const it = items[lbIdx];
+  const img = document.getElementById('lbImg');
+  img.src = `https://picsum.photos/seed/${encodeURIComponent(it.seed)}/900/${Math.round(it.h * 1.9)}`;
+  imgFB(img, it.seed + 'lb', 900, 700);
+  document.getElementById('lbTitle').textContent = it.t;
+  document.getElementById('lbBy').textContent = it.a;
+  const ava = document.getElementById('lbAva');
+  ava.textContent = it.a[0]; ava.style.background = it.color;
+  document.getElementById('lbDesc').textContent = it.desc;
+  const s = document.getElementById('lbSave');
+  s.textContent = '保存到灵感板'; s.classList.remove('saved');
+}
+function closeLb(){ lb.classList.remove('open'); document.body.style.overflow = ''; }
+document.getElementById('lbX').addEventListener('click', closeLb);
+lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
+document.getElementById('lbPrev').addEventListener('click', () => { lbIdx = (lbIdx - 1 + items.length) % items.length; renderLb(); });
+document.getElementById('lbNext').addEventListener('click', () => { lbIdx = (lbIdx + 1) % items.length; renderLb(); });
+document.getElementById('lbSave').addEventListener('click', function(){
+  this.textContent = '已保存 ✓'; this.classList.add('saved'); showToast('已保存到「默认灵感板」');
+});
+addEventListener('keydown', e => {
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLb();
+  if (e.key === 'ArrowLeft') document.getElementById('lbPrev').click();
+  if (e.key === 'ArrowRight') document.getElementById('lbNext').click();
+});
+
+/* 顶栏阴影 */
+addEventListener('scroll', () =>
+  document.getElementById('top').classList.toggle('scrolled', scrollY > 10), {passive:true});
+
+loadBatch();
+</script>
+</body>
+</html>

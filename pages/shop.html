@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="../assets/site-nav.css">
+<title>山海集 - 电商商城测试场景</title>
+<style>
+:root{
+  --bg:#f5f5f3; --panel:#fff; --line:#e8e7e2; --txt:#26241f; --sub:#8a867c;
+  --red:#e05a4e; --gold:#a8842c;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased}
+/* ---------- 顶栏 ---------- */
+.top{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:40px;z-index:100;transition:box-shadow .25s}
+.top.scrolled{box-shadow:0 6px 22px rgba(50,45,35,.1)}
+.top-in{max-width:1280px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:26px}
+.logo{font-size:24px;font-weight:800;letter-spacing:.08em;white-space:nowrap}
+.logo b{color:var(--red)}
+.search{flex:1;max-width:520px;display:flex;border:2px solid var(--txt);border-radius:8px;overflow:hidden;background:#fff}
+.search input{flex:1;border:none;outline:none;padding:9px 16px;font-size:14px}
+.search button{background:var(--txt);color:#fff;border:none;padding:0 22px;font-size:14px;cursor:pointer;transition:.2s}
+.search button:hover{background:var(--red)}
+.cart-btn{position:relative;margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;padding:6px 10px;transition:transform .2s}
+.cart-btn:hover{transform:scale(1.12)}
+.cart-btn .badge{position:absolute;top:0;right:0;background:var(--red);color:#fff;font-size:11px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:grid;place-items:center;padding:0 4px;transition:transform .25s}
+.cart-btn .badge.bump{animation:bump .4s cubic-bezier(.2,1.8,.4,1)}
+@keyframes bump{40%{transform:scale(1.5)}}
+/* ---------- 秒杀条 ---------- */
+.flash{background:linear-gradient(90deg,#2b2118,#4a2c1a);color:#fff}
+.flash-in{max-width:1280px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:18px;font-size:13.5px;flex-wrap:wrap}
+.flash b{color:#ffd166;font-size:15px;letter-spacing:.1em}
+.countdown{display:flex;align-items:center;gap:5px;font-family:ui-monospace,monospace}
+.countdown i{font-style:normal;background:rgba(255,255,255,.14);border-radius:5px;padding:3px 7px;font-size:14px;font-weight:700;min-width:30px;text-align:center}
+.countdown em{font-style:normal;color:#ffd166}
+.flash span{margin-left:auto;color:rgba(255,255,255,.65);font-size:12.5px}
+/* ---------- 工具栏 ---------- */
+.toolbar{max-width:1280px;margin:0 auto;padding:20px 22px 6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 18px;font-size:13.5px;color:var(--sub);cursor:pointer;transition:.2s}
+.chip:hover{border-color:var(--txt);color:var(--txt)}
+.chip.on{background:var(--txt);color:#fff;border-color:var(--txt)}
+.toolbar select{margin-left:auto;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 14px;font-size:13.5px;color:var(--txt);outline:none;cursor:pointer}
+.toolbar .count{font-size:13px;color:var(--sub)}
+/* ---------- 商品网格 ---------- */
+.grid{max-width:1280px;margin:0 auto;padding:16px 22px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:18px}
+.goods{background:var(--panel);border-radius:12px;overflow:hidden;border:1px solid var(--line);transition:transform .25s,box-shadow .25s;position:relative;opacity:0;transform:translateY(14px)}
+.goods.show{opacity:1;transform:none;transition:opacity .45s,transform .45s,box-shadow .25s}
+.goods:hover{transform:translateY(-5px);box-shadow:0 16px 34px -16px rgba(50,45,35,.3)}
+.g-ph{position:relative;aspect-ratio:1;background:#eceae4;overflow:hidden}
+.g-ph img{width:100%;height:100%;object-fit:cover;transition:transform .45s}
+.goods:hover .g-ph img{transform:scale(1.06)}
+.g-tag{position:absolute;top:10px;left:0;background:var(--red);color:#fff;font-size:11.5px;font-weight:700;padding:3px 12px 3px 10px;clip-path:polygon(0 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.g-tag.new{background:var(--gold)}
+.g-body{padding:13px 15px 15px}
+.g-body h4{font-size:14px;font-weight:600;line-height:1.6;height:44px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.g-rate{font-size:12px;color:var(--gold);margin:7px 0 8px}
+.g-rate span{color:var(--sub);margin-left:6px}
+.g-price{display:flex;align-items:baseline;gap:8px}
+.g-price b{color:var(--red);font-size:21px;font-weight:800;font-family:ui-monospace,monospace}
+.g-price b::before{content:"¥";font-size:13px;margin-right:1px}
+.g-price s{color:var(--sub);font-size:12.5px}
+.g-add{width:100%;margin-top:12px;border:1.5px solid var(--txt);background:var(--panel);color:var(--txt);border-radius:8px;padding:8px;font-size:13.5px;font-weight:600;cursor:pointer;transition:.2s}
+.g-add:hover{background:var(--txt);color:#fff}
+.g-add:active{transform:scale(.96)}
+.g-add.added{background:var(--red);border-color:var(--red);color:#fff}
+/* ---------- 购物车抽屉 ---------- */
+.drawer-mask{position:fixed;inset:0;background:rgba(30,27,22,.45);z-index:400;opacity:0;pointer-events:none;transition:opacity .3s}
+.drawer-mask.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:92vw;background:var(--panel);z-index:410;transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.9,.25,1);display:flex;flex-direction:column;box-shadow:-12px 0 40px rgba(0,0,0,.18)}
+.drawer.open{transform:none}
+.d-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+.d-head h3{font-size:17px;font-weight:800}
+.d-head button{background:none;border:none;font-size:18px;cursor:pointer;color:var(--sub);transition:.2s}
+.d-head button:hover{color:var(--txt);transform:rotate(90deg)}
+.d-list{flex:1;overflow-y:auto;padding:10px 22px}
+.d-item{display:flex;gap:13px;padding:14px 0;border-bottom:1px dashed var(--line);animation:slidein .3s ease}
+@keyframes slidein{from{opacity:0;transform:translateX(20px)}}
+.d-item img{width:66px;height:66px;border-radius:9px;object-fit:cover;background:#eceae4;flex-shrink:0}
+.d-item .d-info{flex:1;min-width:0}
+.d-item h5{font-size:13px;font-weight:600;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-item .d-price{color:var(--red);font-weight:800;font-family:ui-monospace,monospace;margin:5px 0}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.qty button{width:26px;height:24px;border:none;background:var(--bg);cursor:pointer;font-size:13px;color:var(--sub);transition:.15s}
+.qty button:hover{color:var(--txt)}
+.qty span{width:34px;text-align:center;font-size:13px;font-family:ui-monospace,monospace}
+.d-item .d-del{background:none;border:none;color:var(--sub);cursor:pointer;font-size:15px;align-self:flex-start;transition:.15s}
+.d-item .d-del:hover{color:var(--red)}
+.d-empty{text-align:center;color:var(--sub);padding:70px 0;font-size:14px;line-height:2.4}
+.d-empty i{font-style:normal;font-size:44px;display:block;opacity:.5}
+.d-foot{border-top:1px solid var(--line);padding:18px 22px}
+.d-total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.d-total b{color:var(--red);font-size:24px;font-weight:800;font-family:ui-monospace,monospace}
+.d-total b::before{content:"¥";font-size:14px}
+.checkout{width:100%;background:var(--red);color:#fff;border:none;border-radius:9px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;transition:.2s}
+.checkout:hover{filter:brightness(1.08)}
+.checkout:active{transform:scale(.97)}
+/* ---------- 其他 ---------- */
+.toast{position:fixed;top:76px;left:50%;transform:translate(-50%,-70px);z-index:500;background:#26241f;color:#fff;font-size:13.5px;padding:11px 26px;border-radius:999px;transition:transform .35s cubic-bezier(.2,.9,.3,1.2);pointer-events:none}
+.toast.show{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<nav id="site-nav">
+  <a class="sn-brand" href="../index.html">🧪 DEV PAGES</a>
+  <div class="sn-items">
+    <a class="sn-item" href="../index.html">新闻门户</a>
+    <a class="sn-item" href="video.html">视频流</a>
+    <a class="sn-item" href="gallery.html">图片瀑布流</a>
+    <a class="sn-item" href="admin.html">管理后台</a>
+    <a class="sn-item" href="article.html">常规网页</a>
+    <a class="sn-item" href="social.html">社交动态</a>
+    <a class="sn-item on" href="shop.html">电商商城</a>
+    <a class="sn-item" href="search.html">搜索结果</a>
+  </div>
+  <span class="sn-clock" id="sn-clock">--:--:--</span>
+</nav>
+<script src="../assets/site-nav.js"></script>
+
+<header class="top" id="top">
+  <div class="top-in">
+    <div class="logo">山海<b>集</b></div>
+    <div class="search"><input placeholder="搜索商品、品牌、品类"><button>搜索</button></div>
+    <button class="cart-btn" id="cartBtn" title="购物车">🛒<span class="badge" id="cartBadge">0</span></button>
+  </div>
+</header>
+
+<div class="flash"><div class="flash-in">
+  <b>⚡ 限时秒杀</b>
+  <span style="color:rgba(255,255,255,.8)">距本场结束</span>
+  <span class="countdown"><i id="cdH">02</i><em>:</em><i id="cdM">00</i><em>:</em><i id="cdS">00</i></span>
+  <span>全场满 299 减 40 · 测试场景数据均为虚构</span>
+</div></div>
+
+<div class="toolbar">
+  <span id="chips" style="display:flex;gap:10px;flex-wrap:wrap"></span>
+  <span class="count" id="count"></span>
+  <select id="sortSel">
+    <option value="default">综合排序</option>
+    <option value="priceAsc">价格从低到高</option>
+    <option value="priceDesc">价格从高到低</option>
+    <option value="sold">销量优先</option>
+  </select>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="drawer-mask" id="mask"></div>
+<aside class="drawer" id="drawer">
+  <div class="d-head"><h3>购物车</h3><button id="dClose">✕</button></div>
+  <div class="d-list" id="dList"></div>
+  <div class="d-foot">
+    <div class="d-total"><span style="color:var(--sub);font-size:13.5px">合计（不含运费）</span><b id="dTotal">0.00</b></div>
+    <button class="checkout" id="checkout">去结算</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+<script>
+/* ================= 数据 ================= */
+const CATS = ['全部','数码','家居','户外','服饰','图书'];
+const GOODS = [
+  ['主动降噪无线耳机 · 头戴式长续航','数码',899,1299,4.8,2.3,'热卖','g1'],
+  ['机械键盘 87 键 · 茶轴热插拔','数码',429,599,4.7,1.1,'热卖','g2'],
+  ['便携手冲咖啡套装 · 含磨豆机','家居',268,358,4.9,0.8,'新品','g3'],
+  ['北欧原木台灯 · 三档色温','家居',189,259,4.6,1.6,'','g4'],
+  ['轻量登山包 28L · 防泼水','户外',359,499,4.8,0.9,'热卖','g5'],
+  ['钛合金保温杯 480ml','户外',158,218,4.7,3.2,'','g6'],
+  ['重磅纯棉基础 T 恤 · 三色','服饰',89,129,4.5,5.6,'','g7'],
+  ['复古帆布斜挎包','服饰',139,199,4.6,1.4,'新品','g8'],
+  ['蓝牙音箱 · 桌面木质款','数码',329,429,4.7,0.7,'','g9'],
+  ['香薰蜡烛 · 雪松与柑橘','家居',98,138,4.8,2.1,'','g10'],
+  ['速干徒步裤 · 弹力防刮','户外',219,299,4.6,1.8,'','g11'],
+  ['《城市漫步指南》签名版','图书',52,68,4.9,4.4,'新品','g12'],
+  ['智能手表 · 血氧心率监测','数码',749,999,4.5,1.9,'热卖','g13'],
+  ['羊毛混纺围巾 · 格纹','服饰',168,238,4.7,0.6,'','g14'],
+  ['《深夜食堂》漫画全集','图书',188,248,4.9,1.2,'','g15'],
+  ['折叠露营椅 · 铝合金骨架','户外',239,329,4.6,1.5,'','g16'],
+];
+let cat = '全部', sort = 'default';
+const cart = new Map();
+
+/* ================= 渲染 ================= */
+const grid = document.getElementById('grid');
+document.getElementById('chips').innerHTML = CATS.map(c =>
+  `<button class="chip ${c===cat?'on':''}" data-c="${c}">${c}</button>`).join('');
+document.getElementById('chips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  cat = b.dataset.c;
+  document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b));
+  render();
+});
+document.getElementById('sortSel').addEventListener('change', e => { sort = e.target.value; render(); });
+
+function imgFB(img, seed){
+  img.onerror = () => { img.onerror = null;
+    const h = [...seed].reduce((a,c)=>a+c.charCodeAt(0),0) % 360;
+    img.src = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h},30%,86%)"/><stop offset="1" stop-color="hsl(${(h+40)%360},25%,72%)"/></linearGradient></defs><rect width="400" height="400" fill="url(#g)"/><text x="200" y="208" fill="rgba(0,0,0,.3)" font-size="16" text-anchor="middle" font-family="sans-serif">商品图</text></svg>`);
+  };
+}
+function stars(r){ return '★'.repeat(Math.round(r)) + '☆'.repeat(5 - Math.round(r)); }
+
+function render(){
+  let list = GOODS.filter(g => cat === '全部' || g[1] === cat);
+  if (sort === 'priceAsc') list = [...list].sort((a,b) => a[2] - b[2]);
+  if (sort === 'priceDesc') list = [...list].sort((a,b) => b[2] - a[2]);
+  if (sort === 'sold') list = [...list].sort((a,b) => b[5] - a[5]);
+  document.getElementById('count').textContent = `共 ${list.length} 件商品`;
+  grid.innerHTML = list.map((g, i) => `
+    <div class="goods" data-id="${g[7]}">
+      <div class="g-ph">
+        <img src="https://picsum.photos/seed/${g[7]}/440/440" alt="${g[0]}" loading="lazy">
+        ${g[6] ? `<span class="g-tag ${g[6]==='新品'?'new':''}">${g[6]}</span>` : ''}
+      </div>
+      <div class="g-body">
+        <h4>${g[0]}</h4>
+        <div class="g-rate">${stars(g[4])}<span>${g[5]}万+ 人已购</span></div>
+        <div class="g-price"><b>${g[2]}</b><s>¥${g[3]}</s></div>
+        <button class="g-add" data-id="${g[7]}">加入购物车</button>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('img').forEach((img, i) => imgFB(img, list[i][7]));
+  requestAnimationFrame(() => [...grid.children].forEach((el, i) =>
+    setTimeout(() => el.classList.add('show'), 35 * (i % 8))));
+}
+
+/* ================= 购物车 ================= */
+const badge = document.getElementById('cartBadge');
+function addToCart(id){
+  const g = GOODS.find(x => x[7] === id);
+  const cur = cart.get(id) || {g, qty:0};
+  cur.qty++; cart.set(id, cur);
+  updateCart();
+  badge.classList.remove('bump'); void badge.offsetWidth; badge.classList.add('bump');
+  showToast(`已加入「${g[0].slice(0, 12)}…」`);
+}
+grid.addEventListener('click', e => {
+  const b = e.target.closest('.g-add'); if (!b) return;
+  addToCart(b.dataset.id);
+  b.textContent = '已加入 ✓'; b.classList.add('added');
+  setTimeout(() => { b.textContent = '加入购物车'; b.classList.remove('added'); }, 1100);
+});
+function updateCart(){
+  const items = [...cart.values()];
+  const totalQty = items.reduce((s,x) => s + x.qty, 0);
+  badge.textContent = totalQty;
+  const dList = document.getElementById('dList');
+  if (!items.length){
+    dList.innerHTML = `<div class="d-empty"><i>🛒</i>购物车还是空的<br>去挑点好东西吧</div>`;
+  } else {
+    dList.innerHTML = items.map(({g, qty}) => `
+      <div class="d-item" data-id="${g[7]}">
+        <img src="https://picsum.photos/seed/${g[7]}/132/132" alt="">
+        <div class="d-info">
+          <h5>${g[0]}</h5>
+          <div class="d-price">¥${g[2]}</div>
+          <span class="qty"><button data-a="dec">−</button><span>${qty}</span><button data-a="inc">＋</button></span>
+        </div>
+        <button class="d-del" data-a="del" title="移除">✕</button>
+      </div>`).join('');
+    dList.querySelectorAll('img').forEach(img => imgFB(img, img.src.match(/seed\/(\w+)/)?.[1] || 'x'));
+  }
+  document.getElementById('dTotal').textContent =
+    items.reduce((s,x) => s + x.g[2] * x.qty, 0).toLocaleString('zh-CN',{minimumFractionDigits:2});
+}
+document.getElementById('dList').addEventListener('click', e => {
+  const b = e.target.closest('button[data-a]'); if (!b) return;
+  const id = b.closest('.d-item').dataset.id;
+  const item = cart.get(id);
+  if (b.dataset.a === 'inc') item.qty++;
+  if (b.dataset.a === 'dec'){ item.qty--; if (item.qty <= 0) cart.delete(id); }
+  if (b.dataset.a === 'del') cart.delete(id);
+  updateCart();
+});
+/* 抽屉 */
+const drawer = document.getElementById('drawer'), mask = document.getElementById('mask');
+function openDrawer(){ drawer.classList.add('open'); mask.classList.add('open'); }
+function closeDrawer(){ drawer.classList.remove('open'); mask.classList.remove('open'); }
+document.getElementById('cartBtn').addEventListener('click', openDrawer);
+document.getElementById('dClose').addEventListener('click', closeDrawer);
+mask.addEventListener('click', closeDrawer);
+addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+document.getElementById('checkout').addEventListener('click', () => {
+  if (!cart.size){ showToast('购物车是空的'); return; }
+  showToast('结算功能仅为演示 · 测试场景');
+});
+
+/* ================= 秒杀倒计时 ================= */
+let remain = 2 * 3600 + 0 * 60;
+setInterval(() => {
+  remain = remain > 0 ? remain - 1 : 2 * 3600;
+  const h = String(Math.floor(remain / 3600)).padStart(2,'0');
+  const m = String(Math.floor(remain % 3600 / 60)).padStart(2,'0');
+  const s = String(remain % 60).padStart(2,'0');
+  cdH.textContent = h; cdM.textContent = m; cdS.textContent = s;
+}, 1000);
+
+/* ================= Toast ================= */
+const toast = document.getElementById('toast');
+let toastTimer;
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1700);
+}
+
+addEventListener('scroll', () =>
+  document.getElementById('top').classList.toggle('scrolled', scrollY > 8), {passive:true});
+
+render();
+updateCart();
+</script>
+</body>
+</html>

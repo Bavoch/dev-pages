@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="../assets/site-nav.css">
+<title>云枢控制台 - 管理后台测试场景</title>
+<style>
+:root{
+  --side:#161b26; --side-2:#1d2432; --side-txt:#8b95a9; --side-on:#b48cff;
+  --bg:#f3f4f8; --panel:#fff; --line:#e6e8ef; --txt:#232833; --sub:#7a8194;
+  --pri:#5b5bd6; --pri-soft:#eceafd;
+  --ok:#1a9e6c; --ok-soft:#e2f6ec; --warn:#c07f10; --warn-soft:#fdf3dd;
+  --err:#d64545; --err-soft:#fdeaea; --info:#2f7fd6; --info-soft:#e7f2fd;
+}
+body.dark{
+  --bg:#12151d; --panel:#1a1f2b; --line:#262c3a; --txt:#e5e8f0; --sub:#8a92a6;
+  --pri-soft:#252547; --ok-soft:#12352a; --warn-soft:#3a2f14; --err-soft:#3c1d1d; --info-soft:#16304c;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;font-size:14px;-webkit-font-smoothing:antialiased;transition:background .3s}
+/* ---------- 侧栏 ---------- */
+.sidebar{position:fixed;left:0;top:40px;bottom:0;width:230px;background:var(--side);display:flex;flex-direction:column;z-index:100}
+.s-logo{height:58px;display:flex;align-items:center;gap:10px;padding:0 20px;color:#fff;font-size:16px;font-weight:700;border-bottom:1px solid var(--side-2)}
+.s-logo i{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#b48cff,#5b5bd6);display:grid;place-items:center;font-style:normal;font-size:13px}
+.s-group{padding:16px 12px 4px;font-size:11px;color:#565f73;letter-spacing:.2em}
+.s-nav a{display:flex;align-items:center;gap:11px;padding:10px 14px;margin:2px 8px;border-radius:8px;color:var(--side-txt);font-size:13.5px;cursor:pointer;transition:.18s;text-decoration:none;position:relative}
+.s-nav a:hover{background:var(--side-2);color:#dfe3ec}
+.s-nav a.on{background:linear-gradient(90deg,rgba(180,140,255,.16),rgba(91,91,214,.1));color:#fff}
+.s-nav a.on::before{content:"";position:absolute;left:-8px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--side-on)}
+.s-nav .badge{margin-left:auto;background:var(--err);color:#fff;font-size:10.5px;border-radius:999px;padding:1px 7px}
+.s-foot{margin-top:auto;padding:16px 20px;border-top:1px solid var(--side-2);color:#565f73;font-size:11.5px;line-height:1.9}
+/* ---------- 主区 ---------- */
+.main{margin-left:230px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{position:sticky;top:40px;z-index:90;height:58px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 24px;transition:background .3s}
+.crumb{font-size:13px;color:var(--sub)}
+.crumb b{color:var(--txt);font-weight:600}
+.t-search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 14px;width:240px;transition:.2s}
+.t-search:focus-within{border-color:var(--pri);width:300px}
+.t-search input{flex:1;border:none;outline:none;background:none;color:var(--txt);font-size:13px}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--sub);cursor:pointer;font-size:15px;transition:.2s}
+.icon-btn:hover{color:var(--pri);border-color:var(--pri)}
+.icon-btn .dot{position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--err);border:1.5px solid var(--panel)}
+.t-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#b48cff,#5b5bd6);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;cursor:pointer}
+/* ---------- 内容 ---------- */
+.content{padding:24px;flex:1}
+.page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-head h1{font-size:21px;font-weight:700}
+.page-head p{font-size:12.5px;color:var(--sub);margin-top:4px}
+.btn{border:none;border-radius:8px;padding:9px 20px;font-size:13.5px;cursor:pointer;transition:.2s;font-weight:600}
+.btn-pri{background:var(--pri);color:#fff}
+.btn-pri:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.btn-ghost{background:var(--panel);border:1px solid var(--line);color:var(--sub)}
+.btn-ghost:hover{color:var(--pri);border-color:var(--pri)}
+/* 统计卡 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;transition:transform .2s,box-shadow .2s,background .3s;position:relative;overflow:hidden}
+.stat:hover{transform:translateY(-3px);box-shadow:0 10px 26px -14px rgba(30,35,60,.35)}
+.stat .lb{font-size:12.5px;color:var(--sub)}
+.stat .num{font-size:27px;font-weight:700;margin:8px 0 6px;font-variant-numeric:tabular-nums;font-family:ui-monospace,'SF Mono',Menlo,monospace}
+.stat .delta{font-size:12px;font-weight:600}
+.delta.up{color:var(--ok)}.delta.down{color:var(--err)}
+.stat svg{position:absolute;right:14px;bottom:14px;opacity:.9}
+/* 图表 */
+.charts{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;transition:background .3s}
+.card h3{font-size:15px;font-weight:700;margin-bottom:4px}
+.card .hint{font-size:12px;color:var(--sub);margin-bottom:16px}
+#lineChart{width:100%;height:220px;display:block}
+#lineChart .grid-l{stroke:var(--line)}
+#lineChart .area{fill:url(#agrad);opacity:.9}
+#lineChart .ln{fill:none;stroke:var(--pri);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 1.6s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+#lineChart .pt{fill:var(--panel);stroke:var(--pri);stroke-width:2;opacity:0;animation:pop .3s ease forwards;cursor:pointer}
+@keyframes pop{to{opacity:1}}
+.donut-wrap{display:flex;align-items:center;gap:22px}
+.donut{transform:rotate(-90deg)}
+.donut circle{fill:none;stroke-width:16;stroke-linecap:round;transition:stroke-dasharray 1.2s ease}
+.d-legend{flex:1;display:flex;flex-direction:column;gap:12px;font-size:13px}
+.d-legend li{list-style:none;display:flex;align-items:center;gap:9px;color:var(--sub)}
+.d-legend i{width:10px;height:10px;border-radius:3px;font-style:normal}
+.d-legend b{margin-left:auto;color:var(--txt);font-variant-numeric:tabular-nums}
+/* 表格 */
+.tbl-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.tbl-head input{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--txt);outline:none;width:200px;transition:border-color .2s}
+.tbl-head input:focus{border-color:var(--pri)}
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;color:var(--sub);font-weight:600;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
+th.sortable{cursor:pointer}
+th.sortable:hover{color:var(--pri)}
+th .arr{font-size:10px;margin-left:4px;opacity:.4}
+th.sorted .arr{opacity:1;color:var(--pri)}
+td{padding:12px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:var(--bg)}
+tbody tr.flash{animation:rowflash 1.2s}
+@keyframes rowflash{0%{background:var(--pri-soft)}100%{background:transparent}}
+.oid{font-family:ui-monospace,monospace;font-size:12.5px;color:var(--sub)}
+.cust{display:flex;align-items:center;gap:9px}
+.cust i{width:28px;height:28px;border-radius:50%;font-style:normal;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0}
+.amt{font-family:ui-monospace,monospace;font-weight:600;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:3px 12px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.err{background:var(--err-soft);color:var(--err)}
+.pill.info{background:var(--info-soft);color:var(--info)}
+.row-act{display:flex;gap:10px}
+.row-act button{background:none;border:none;color:var(--sub);font-size:12.5px;cursor:pointer;transition:.15s;padding:2px}
+.row-act button:hover{color:var(--pri)}
+.row-act button.del:hover{color:var(--err)}
+.pager{display:flex;align-items:center;justify-content:space-between;margin-top:16px;font-size:13px;color:var(--sub)}
+.pager .pages{display:flex;gap:6px}
+.pager button{min-width:32px;height:32px;border:1px solid var(--line);background:var(--panel);color:var(--sub);border-radius:7px;cursor:pointer;font-size:13px;transition:.15s}
+.pager button:hover:not(:disabled){border-color:var(--pri);color:var(--pri)}
+.pager button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.pager button:disabled{opacity:.4;cursor:default}
+/* ---------- 模态框 ---------- */
+.mask{position:fixed;inset:0;z-index:400;background:rgba(15,18,28,.5);display:none;place-items:center;animation:fade .2s}
+.mask.open{display:grid}
+@keyframes fade{from{opacity:0}}
+.modal{background:var(--panel);border-radius:14px;width:440px;max-width:92vw;padding:24px;animation:up .28s cubic-bezier(.2,.9,.3,1.15)}
+@keyframes up{from{transform:translateY(24px);opacity:0}}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:18px}
+.modal label{display:block;font-size:12.5px;color:var(--sub);margin:12px 0 6px}
+.modal input,.modal select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 13px;font-size:13.5px;color:var(--txt);outline:none;transition:border-color .2s}
+.modal input:focus,.modal select:focus{border-color:var(--pri)}
+.modal .m-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+/* ---------- Toast ---------- */
+#toasts{position:fixed;top:70px;right:24px;z-index:500;display:flex;flex-direction:column;gap:10px}
+.toast{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:10px;padding:12px 18px;font-size:13.5px;box-shadow:0 10px 30px -12px rgba(20,25,45,.35);animation:tin .3s cubic-bezier(.2,.9,.3,1.2);display:flex;gap:10px;align-items:center}
+.toast.err{border-left-color:var(--err)}
+.toast.info{border-left-color:var(--info)}
+@keyframes tin{from{transform:translateX(60px);opacity:0}}
+.toast.out{transition:.3s;opacity:0;transform:translateX(60px)}
+@media (max-width:1100px){.stats{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}}
+@media (max-width:760px){.sidebar{display:none}.main{margin-left:0}}
+</style>
+</head>
+<body>
+<nav id="site-nav">
+  <a class="sn-brand" href="../index.html">🧪 DEV PAGES</a>
+  <div class="sn-items">
+    <a class="sn-item" href="../index.html">新闻门户</a>
+    <a class="sn-item" href="video.html">视频流</a>
+    <a class="sn-item" href="gallery.html">图片瀑布流</a>
+    <a class="sn-item on" href="admin.html">管理后台</a>
+    <a class="sn-item" href="article.html">常规网页</a>
+    <a class="sn-item" href="social.html">社交动态</a>
+    <a class="sn-item" href="shop.html">电商商城</a>
+    <a class="sn-item" href="search.html">搜索结果</a>
+  </div>
+  <span class="sn-clock" id="sn-clock">--:--:--</span>
+</nav>
+<script src="../assets/site-nav.js"></script>
+
+<aside class="sidebar">
+  <div class="s-logo"><i>云</i>云枢控制台</div>
+  <div class="s-group">主导航</div>
+  <nav class="s-nav">
+    <a class="on">▦ 运营概览</a>
+    <a>◔ 数据分析</a>
+    <a>☰ 订单管理 <span class="badge">12</span></a>
+    <a>☺ 用户管理</a>
+    <a>✎ 内容审核 <span class="badge">3</span></a>
+  </nav>
+  <div class="s-group">系统</div>
+  <nav class="s-nav">
+    <a>⚙ 系统设置</a>
+    <a>⛨ 权限管理</a>
+    <a>▤ 操作日志</a>
+  </nav>
+  <div class="s-foot">v2.4.1 · build 20250712<br>环境：production</div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <span class="crumb">控制台 / <b>运营概览</b></span>
+    <div class="t-search"><span>⌕</span><input placeholder="搜索功能、订单、用户…"></div>
+    <button class="icon-btn" id="themeBtn" title="切换深浅主题">◐</button>
+    <button class="icon-btn" title="通知">🔔<span class="dot"></span></button>
+    <div class="t-ava">管</div>
+  </header>
+
+  <div class="content">
+    <div class="page-head">
+      <div><h1>运营概览</h1><p>数据每 5 分钟自动刷新 · 最近更新 <span id="lastUp">--</span></p></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost">导出报表</button>
+        <button class="btn btn-pri" id="newBtn">＋ 新建订单</button>
+      </div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="charts">
+      <div class="card">
+        <h3>近 7 日访问趋势</h3>
+        <p class="hint">单位：千次 · 悬停查看节点</p>
+        <svg id="lineChart" viewBox="0 0 700 220" preserveAspectRatio="none">
+          <defs><linearGradient id="agrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#5b5bd6" stop-opacity=".28"/>
+            <stop offset="1" stop-color="#5b5bd6" stop-opacity="0"/>
+          </linearGradient></defs>
+        </svg>
+      </div>
+      <div class="card">
+        <h3>渠道来源占比</h3>
+        <p class="hint">本月累计</p>
+        <div class="donut-wrap">
+          <svg class="donut" width="150" height="150" viewBox="0 0 150 150" id="donut"></svg>
+          <ul class="d-legend" id="dLegend"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tbl-head">
+        <h3 style="margin:0">最近订单</h3>
+        <input id="tblSearch" placeholder="筛选客户 / 订单号…">
+        <span style="font-size:12px;color:var(--sub)" id="tblCount"></span>
+      </div>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>订单号</th>
+          <th>客户</th>
+          <th class="sortable" data-k="amt">金额<span class="arr">↕</span></th>
+          <th>状态</th>
+          <th class="sortable" data-k="time">下单时间<span class="arr">↕</span></th>
+          <th>操作</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      </div>
+      <div class="pager">
+        <span id="pageInfo"></span>
+        <div class="pages" id="pages"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="modal">
+    <h3>新建订单</h3>
+    <label>客户姓名</label><input id="fName" placeholder="请输入客户姓名">
+    <label>订单金额（元）</label><input id="fAmt" type="number" min="0" placeholder="0.00">
+    <label>订单状态</label>
+    <select id="fStatus"><option>待支付</option><option>处理中</option><option>已完成</option></select>
+    <div class="m-foot">
+      <button class="btn btn-ghost" id="mCancel">取消</button>
+      <button class="btn btn-pri" id="mOk">创建</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script>
+/* ================= 统计卡 ================= */
+const STATS = [
+  {lb:'今日访问', num:48213, delta:'+12.4%', up:true, spark:[30,42,38,55,49,62,70]},
+  {lb:'新增用户', num:1287,  delta:'+8.1%',  up:true, spark:[20,26,24,30,34,32,40]},
+  {lb:'订单数量', num:3421,  delta:'-3.2%',  up:false,spark:[44,40,42,36,38,33,30]},
+  {lb:'转化率',   num:6.8,   delta:'+0.9%',  up:true, spark:[18,22,20,26,25,30,33], suffix:'%'},
+];
+function sparkline(data, color){
+  const w = 84, h = 34, max = Math.max(...data), min = Math.min(...data);
+  const pts = data.map((v,i) => `${(i/(data.length-1))*w},${h - ((v-min)/(max-min||1))*(h-6) - 3}`).join(' ');
+  return `<svg width="${w}" height="${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+document.getElementById('stats').innerHTML = STATS.map(s => `
+  <div class="stat">
+    <div class="lb">${s.lb}</div>
+    <div class="num" data-target="${s.num}" data-suffix="${s.suffix||''}">0</div>
+    <span class="delta ${s.up?'up':'down'}">${s.delta} 较昨日</span>
+    ${sparkline(s.spark, s.up ? '#1a9e6c' : '#d64545')}
+  </div>`).join('');
+/* 数字滚动 */
+document.querySelectorAll('.num').forEach(el => {
+  const target = parseFloat(el.dataset.target), suf = el.dataset.suffix;
+  const t0 = performance.now(), dur = 1100;
+  (function step(t){
+    const p = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = (target * e).toLocaleString('zh-CN', {maximumFractionDigits:1}) + suf;
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+});
+
+/* ================= 折线图 ================= */
+(function(){
+  const data = [32, 41, 38, 52, 47, 60, 56];
+  const days = ['周一','周二','周三','周四','周五','周六','周日'];
+  const svg = document.getElementById('lineChart');
+  const W = 700, H = 220, P = 26, max = 70;
+  let grid = '';
+  for (let i = 0; i <= 4; i++){
+    const y = P + (H - 2*P) * i / 4;
+    grid += `<line class="grid-l" x1="${P}" y1="${y}" x2="${W-P}" y2="${y}" stroke-dasharray="3 5"/>`;
+  }
+  const pts = data.map((v,i) => [P + (W-2*P)*i/(data.length-1), H - P - (H-2*P)*v/max]);
+  const line = pts.map(p => p.join(',')).join(' ');
+  const area = `${P},${H-P} ${line} ${W-P},${H-P}`;
+  svg.innerHTML += grid +
+    `<polygon class="area" points="${area}"/>` +
+    `<polyline class="ln" points="${line}"/>` +
+    pts.map((p,i) => `<circle class="pt" cx="${p[0]}" cy="${p[1]}" r="4" style="animation-delay:${1.2 + i*0.08}s"><title>${days[i]}：${data[i]}k 次访问</title></circle>`).join('') +
+    pts.map((p,i) => `<text x="${p[0]}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--sub)">${days[i]}</text>`).join('');
+})();
+
+/* ================= 环形图 ================= */
+(function(){
+  const parts = [
+    {n:'自然搜索', v:38, c:'#5b5bd6'},
+    {n:'社交媒体', v:27, c:'#b48cff'},
+    {n:'直接访问', v:21, c:'#4dd6c1'},
+    {n:'外部推荐', v:14, c:'#ffb454'},
+  ];
+  const R = 58, C = 2 * Math.PI * R;
+  const donut = document.getElementById('donut');
+  let acc = 0;
+  donut.innerHTML = `<circle cx="75" cy="75" r="${R}" stroke="var(--line)" stroke-width="16" fill="none"/>`;
+  parts.forEach(p => {
+    const len = C * p.v / 100;
+    const el = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    el.setAttribute('cx',75); el.setAttribute('cy',75); el.setAttribute('r',R);
+    el.setAttribute('stroke',p.c);
+    el.setAttribute('stroke-dasharray',`0 ${C}`);
+    el.setAttribute('stroke-dashoffset',-C * acc / 100);
+    donut.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => el.setAttribute('stroke-dasharray',`${len} ${C - len}`)));
+    acc += p.v;
+  });
+  document.getElementById('dLegend').innerHTML = parts.map(p =>
+    `<li><i style="background:${p.c}"></i>${p.n}<b>${p.v}%</b></li>`).join('');
+})();
+
+/* ================= 订单表格 ================= */
+const NAMES = ['林晚晴','周砚','沈星河','顾之遥','陆知行','苏念安','裴野','温以凡','江树','许清欢','程既白','叶蓁蓁'];
+const STATUS = [['已完成','ok'],['待支付','warn'],['已退款','err'],['处理中','info']];
+const AVA_C = ['#5b5bd6','#b48cff','#1a9e6c','#c07f10','#2f7fd6','#d64545'];
+let orders = [];
+for (let i = 0; i < 23; i++){
+  const st = STATUS[Math.floor(Math.random()*4)];
+  orders.push({
+    id:'SO-2025' + String(7120 - i * 7).padStart(5,'0'),
+    name:NAMES[i % NAMES.length],
+    amt:Math.round(Math.random()*9000 + 80) / 10 * 10 + Math.round(Math.random()*9)/10,
+    status:st[0], cls:st[1],
+    time:Date.now() - i * 3600e3 * (2 + Math.random()*4),
+  });
+}
+let sortKey = null, sortDir = -1, page = 1, filter = '';
+const PAGE_SIZE = 6;
+const tbody = document.getElementById('tbody');
+
+function fmtTime(t){
+  const d = new Date(t), now = new Date();
+  const hm = d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});
+  return d.toDateString() === now.toDateString() ? '今天 ' + hm
+    : d.toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}) + ' ' + hm;
+}
+function render(){
+  let list = orders.filter(o => !filter || o.name.includes(filter) || o.id.toLowerCase().includes(filter));
+  if (sortKey) list = [...list].sort((a,b) => (a[sortKey] - b[sortKey]) * sortDir);
+  const total = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  page = Math.min(page, total);
+  const rows = list.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+  document.getElementById('tblCount').textContent = `共 ${list.length} 条`;
+  tbody.innerHTML = rows.map(o => `
+    <tr data-id="${o.id}">
+      <td class="oid">${o.id}</td>
+      <td><span class="cust"><i style="background:${AVA_C[o.name.charCodeAt(0)%AVA_C.length]}">${o.name[0]}</i>${o.name}</span></td>
+      <td class="amt">¥ ${o.amt.toLocaleString('zh-CN',{minimumFractionDigits:2})}</td>
+      <td><span class="pill ${o.cls}">${o.status}</span></td>
+      <td style="color:var(--sub)">${fmtTime(o.time)}</td>
+      <td><span class="row-act"><button data-a="view">查看</button><button class="del" data-a="del">删除</button></span></td>
+    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:30px">没有匹配的记录</td></tr>`;
+  document.getElementById('pageInfo').textContent = `第 ${page} / ${total} 页`;
+  const pages = document.getElementById('pages');
+  let ph = `<button ${page===1?'disabled':''} data-p="${page-1}">‹</button>`;
+  for (let i = 1; i <= total; i++) ph += `<button class="${i===page?'on':''}" data-p="${i}">${i}</button>`;
+  ph += `<button ${page===total?'disabled':''} data-p="${page+1}">›</button>`;
+  pages.innerHTML = ph;
+}
+document.getElementById('pages').addEventListener('click', e => {
+  const b = e.target.closest('button[data-p]'); if (!b || b.disabled) return;
+  page = +b.dataset.p; render();
+});
+document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', () => {
+  const k = th.dataset.k;
+  if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = -1; }
+  document.querySelectorAll('th.sortable').forEach(x => {
+    x.classList.toggle('sorted', x === th);
+    x.querySelector('.arr').textContent = (x === th) ? (sortDir === -1 ? '↓' : '↑') : '↕';
+  });
+  render();
+}));
+document.getElementById('tblSearch').addEventListener('input', e => { filter = e.target.value.trim(); page = 1; render(); });
+
+tbody.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-a]'); if (!btn) return;
+  const id = btn.closest('tr').dataset.id;
+  if (btn.dataset.a === 'view'){ toast('info', `查看订单 ${id} 详情（演示）`); }
+  else {
+    orders = orders.filter(o => o.id !== id);
+    render();
+    toast('err', `订单 ${id} 已删除`);
+  }
+});
+
+/* ================= 模态框 ================= */
+const mask = document.getElementById('mask');
+document.getElementById('newBtn').addEventListener('click', () => mask.classList.add('open'));
+document.getElementById('mCancel').addEventListener('click', () => mask.classList.remove('open'));
+mask.addEventListener('click', e => { if (e.target === mask) mask.classList.remove('open'); });
+addEventListener('keydown', e => { if (e.key === 'Escape') mask.classList.remove('open'); });
+document.getElementById('mOk').addEventListener('click', () => {
+  const name = document.getElementById('fName').value.trim();
+  const amt = parseFloat(document.getElementById('fAmt').value);
+  if (!name || !amt || amt <= 0){ toast('err','请填写完整的客户与金额信息'); return; }
+  const st = document.getElementById('fStatus').value;
+  const cls = STATUS.find(s => s[0] === st)[1];
+  orders.unshift({id:'SO-2025' + String(Math.floor(Math.random()*90000)+10000), name, amt, status:st, cls, time:Date.now()});
+  mask.classList.remove('open');
+  document.getElementById('fName').value = ''; document.getElementById('fAmt').value = '';
+  sortKey = null; filter = ''; document.getElementById('tblSearch').value = '';
+  page = 1; render();
+  tbody.querySelector('tr')?.classList.add('flash');
+  toast('ok', `订单创建成功，客户：${name}`);
+});
+
+/* ================= Toast ================= */
+function toast(type, msg){
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type === 'err' ? 'err' : type === 'info' ? 'info' : '');
+  el.innerHTML = `<span>${type==='ok'?'✓':type==='err'?'✕':'ℹ'}</span>${msg}`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 320); }, 2600);
+}
+
+/* ================= 主题切换 ================= */
+const themeBtn = document.getElementById('themeBtn');
+if (localStorage.getItem('admin-dark') === '1') document.body.classList.add('dark');
+themeBtn.addEventListener('click', () => {
+  const on = document.body.classList.toggle('dark');
+  localStorage.setItem('admin-dark', on ? '1' : '0');
+  toast('info', on ? '已切换到深色主题' : '已切换到浅色主题');
+});
+
+/* ================= 其他 ================= */
+document.getElementById('lastUp').textContent = new Date().toLocaleTimeString('zh-CN',{hour12:false});
+document.querySelectorAll('.s-nav a').forEach(a => a.addEventListener('click', function(e){
+  e.preventDefault();
+  document.querySelectorAll('.s-nav a').forEach(x => x.classList.remove('on'));
+  this.classList.add('on');
+}));
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="../assets/site-nav.css">
+<title>城市漫步指南：用脚步重新认识你住的地方 - 山行笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fbfaf6; --ink:#22281f; --sub:#6d7365; --line:#e6e4da;
+  --green:#1f6f54; --green-soft:#e8f1ec; --code-bg:#1d2420;
+  --serif:'Noto Serif SC','Songti SC','SimSun',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+/* 阅读进度条 */
+#progress{position:fixed;top:40px;left:0;height:3px;width:0;background:var(--green);z-index:300;transition:width .1s linear}
+/* 顶栏 */
+.top{position:sticky;top:40px;z-index:200;background:rgba(251,250,246,.95);border-bottom:1px solid var(--line)}
+.top-in{max-width:1080px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;gap:30px}
+.site{font-weight:900;font-size:18px;letter-spacing:.06em}
+.site b{color:var(--green)}
+.top-in nav{display:flex;gap:22px;font-size:14px;color:var(--sub);font-family:'PingFang SC',sans-serif}
+.top-in nav a{cursor:pointer;transition:color .2s}
+.top-in nav a:hover{color:var(--green)}
+.top-in .sub-btn{margin-left:auto;font-family:'PingFang SC',sans-serif;font-size:13px;background:var(--green);color:#fff;border:none;border-radius:999px;padding:8px 20px;cursor:pointer;transition:.2s}
+.top-in .sub-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+/* 布局 */
+.layout{max-width:1080px;margin:0 auto;padding:48px 24px 80px;display:grid;grid-template-columns:200px 1fr;gap:56px}
+/* TOC */
+.toc{position:sticky;top:128px;align-self:start;font-family:'PingFang SC',sans-serif;font-size:13px}
+.toc h5{font-size:11px;letter-spacing:.3em;color:var(--sub);margin-bottom:14px;font-weight:600}
+.toc a{display:block;padding:6px 0 6px 14px;color:var(--sub);border-left:2px solid var(--line);cursor:pointer;transition:.2s;text-decoration:none;line-height:1.6}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--green);border-left-color:var(--green);font-weight:600}
+/* 文章头 */
+.a-cat{display:inline-block;font-family:'PingFang SC',sans-serif;font-size:12px;color:var(--green);background:var(--green-soft);border-radius:999px;padding:4px 14px;letter-spacing:.1em}
+header.a-head{margin:20px 0 30px}
+h1{font-size:clamp(28px,4vw,40px);font-weight:900;line-height:1.5;letter-spacing:.01em}
+.a-meta{display:flex;align-items:center;gap:14px;margin-top:22px;font-family:'PingFang SC',sans-serif;font-size:13px;color:var(--sub)}
+.a-meta .ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#1f6f54,#4da384);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:700}
+.a-meta b{color:var(--ink);font-weight:600;display:block}
+/* 正文 */
+.article{font-size:17px;line-height:2.05;letter-spacing:.02em}
+.article h2{font-size:25px;font-weight:900;margin:52px 0 20px;padding-left:16px;border-left:5px solid var(--green);line-height:1.5;scroll-margin-top:130px}
+.article p{margin-bottom:22px}
+.article a{color:var(--green);text-decoration:underline;text-underline-offset:4px}
+.article strong{font-weight:700}
+.article figure{margin:32px 0}
+.article figure img{width:100%;border-radius:8px;display:block}
+.article figcaption{font-family:'PingFang SC',sans-serif;font-size:12.5px;color:var(--sub);text-align:center;margin-top:10px;letter-spacing:.05em}
+.article blockquote{margin:30px 0;padding:20px 26px;background:var(--green-soft);border-left:4px solid var(--green);border-radius:0 8px 8px 0;font-size:16px;color:#3d5a4e;line-height:2}
+.article ul,.article ol{margin:0 0 22px 26px}
+.article li{margin-bottom:8px}
+.article li::marker{color:var(--green)}
+.article code{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.85em;background:#eef0e8;color:#1d4a38;padding:2px 7px;border-radius:4px}
+.code-block{position:relative;margin:30px 0;border-radius:10px;overflow:hidden;background:var(--code-bg)}
+.code-block .cb-head{display:flex;justify-content:space-between;align-items:center;padding:9px 16px;background:rgba(255,255,255,.06);font-family:'PingFang SC',sans-serif;font-size:12px;color:#8fa89b}
+.code-block button{background:none;border:1px solid rgba(255,255,255,.2);color:#c8d8cf;border-radius:5px;padding:3px 12px;font-size:11.5px;cursor:pointer;font-family:'PingFang SC',sans-serif;transition:.2s}
+.code-block button:hover{border-color:#4da384;color:#4da384}
+.code-block pre{padding:18px 20px;overflow-x:auto;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;line-height:1.9;color:#c8d8cf}
+.code-block .c{color:#5f7a6d}.code-block .k{color:#7fc9a8}.code-block .s{color:#d9b36b}
+.article table{width:100%;border-collapse:collapse;margin:30px 0;font-family:'PingFang SC',sans-serif;font-size:14px}
+.article th{background:var(--green);color:#fff;text-align:left;padding:10px 16px;font-weight:600}
+.article td{padding:10px 16px;border-bottom:1px solid var(--line)}
+.article tr:hover td{background:var(--green-soft)}
+/* 作者卡 */
+.author-card{margin-top:56px;padding:24px 28px;border:1px solid var(--line);border-radius:12px;display:flex;gap:18px;align-items:center;font-family:'PingFang SC',sans-serif;background:#fff}
+.author-card .ava{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1f6f54,#4da384);color:#fff;display:grid;place-items:center;font-size:20px;font-weight:700;flex-shrink:0}
+.author-card h4{font-size:16px;font-weight:700}
+.author-card p{font-size:13px;color:var(--sub);margin-top:6px;line-height:1.8}
+/* 评论 */
+.comments{margin-top:56px;font-family:'PingFang SC',sans-serif}
+.comments h3{font-size:19px;font-weight:700;margin-bottom:22px;font-family:var(--serif)}
+.c-item{display:flex;gap:14px;padding:18px 0;border-bottom:1px solid var(--line)}
+.c-item .ava{width:40px;height:40px;border-radius:50%;color:#fff;display:grid;place-items:center;font-size:14px;font-weight:700;flex-shrink:0}
+.c-item h5{font-size:14px;font-weight:600}
+.c-item h5 span{font-weight:400;font-size:12px;color:var(--sub);margin-left:10px}
+.c-item p{font-size:14px;line-height:1.9;color:#454b40;margin-top:6px}
+.c-form{margin-top:28px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}
+.c-form input,.c-form textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;transition:border-color .2s;background:var(--paper)}
+.c-form input:focus,.c-form textarea:focus{border-color:var(--green)}
+.c-form textarea{resize:vertical;min-height:88px}
+.c-form button{background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px 30px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+.c-form button:hover{filter:brightness(1.1)}
+.c-form button:active{transform:scale(.96)}
+/* 浮动 */
+#toTop{position:fixed;right:20px;bottom:70px;width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--line);color:var(--sub);font-size:17px;cursor:pointer;opacity:0;transform:translateY(10px);transition:.3s;box-shadow:0 4px 16px rgba(40,50,40,.12);z-index:250}
+#toTop.show{opacity:1;transform:none}
+#toTop:hover{color:var(--green);border-color:var(--green)}
+@media (max-width:860px){.layout{grid-template-columns:1fr}.toc{display:none}}
+</style>
+</head>
+<body>
+<nav id="site-nav">
+  <a class="sn-brand" href="../index.html">🧪 DEV PAGES</a>
+  <div class="sn-items">
+    <a class="sn-item" href="../index.html">新闻门户</a>
+    <a class="sn-item" href="video.html">视频流</a>
+    <a class="sn-item" href="gallery.html">图片瀑布流</a>
+    <a class="sn-item" href="admin.html">管理后台</a>
+    <a class="sn-item on" href="article.html">常规网页</a>
+    <a class="sn-item" href="social.html">社交动态</a>
+    <a class="sn-item" href="shop.html">电商商城</a>
+    <a class="sn-item" href="search.html">搜索结果</a>
+  </div>
+  <span class="sn-clock" id="sn-clock">--:--:--</span>
+</nav>
+<script src="../assets/site-nav.js"></script>
+
+<div id="progress"></div>
+
+<header class="top"><div class="top-in">
+  <div class="site">山行<b>笔记</b></div>
+  <nav><a>首页</a><a>文章</a><a>路书</a><a>关于</a></nav>
+  <button class="sub-btn">订阅更新</button>
+</div></header>
+
+<div class="layout">
+  <aside class="toc" id="toc">
+    <h5>本页目录</h5>
+    <a data-t="s1">为什么是走路</a>
+    <a data-t="s2">出发前的准备</a>
+    <a data-t="s3">路线从哪里来</a>
+    <a data-t="s4">路上的观察法</a>
+    <a data-t="s5">把路线记录下来</a>
+    <a data-t="s6">写在最后</a>
+  </aside>
+
+  <main>
+    <header class="a-head">
+      <span class="a-cat">城市观察</span>
+      <h1>城市漫步指南：用脚步重新认识你住的地方</h1>
+      <div class="a-meta">
+        <span class="ava">山</span>
+        <span><b>山行</b>2025 年 6 月 8 日 · 全文约 2400 字 · 阅读 8 分钟</span>
+      </div>
+    </header>
+
+    <article class="article">
+      <p>你有多久没有不带目的地走过一条街了？通勤的路上我们盯着导航，外卖的距离我们交给骑手，城市被压缩成一个个坐标点。而<strong>城市漫步（City Walk）</strong>想做的，恰恰是把坐标重新展开成街道、气味、声音和人。</p>
+      <p>这篇文章整理了近三年我在十几座城市走路攒下的经验：怎么准备、怎么规划、怎么看，以及怎么把一次散步变成一份可以复用的记录。</p>
+
+      <h2 id="s1">为什么是走路</h2>
+      <p>交通工具决定了我们感知城市的分辨率。地铁把城市切成站与站之间的黑箱，汽车让街景变成流动的幕布。只有步行，速度恰好落在「看得清细节」又「走得动距离」的区间里——你会注意到骑楼立柱上的裂纹、面包店出炉的时间、老人下棋的固定摊位。</p>
+      <blockquote>「步行是唯一一种让城市向你敞开的方式。车轮太快，屏幕太近，只有脚步刚刚好。」—— 引自一位不愿透露姓名的城市规划师朋友</blockquote>
+      <p>研究也支持这一点：步行时大脑默认模式网络更活跃，这正是创造性思考的温床。很多程序员朋友把「散步调试法」当成玄学，其实不过是让潜意识接管了问题。</p>
+
+      <h2 id="s2">出发前的准备</h2>
+      <p>漫步不是远征，装备的核心原则是<strong>轻</strong>。以下是我反复精简后的清单：</p>
+      <table>
+        <tr><th>物品</th><th>必要性</th><th>说明</th></tr>
+        <tr><td>舒适的鞋</td><td>★★★★★</td><td>唯一不能省的装备，旧鞋比新鞋好</td></tr>
+        <tr><td>充电宝</td><td>★★★★</td><td>地图、拍照、记录都靠手机</td></tr>
+        <tr><td>折叠水杯</td><td>★★★</td><td>夏天必备，便利店可补水</td></tr>
+        <tr><td>纸笔</td><td>★★★</td><td>画路线草图比打字快，也更有感觉</td></tr>
+        <tr><td>耳机</td><td>★★</td><td>建议只戴一只，留一只耳朵给街道</td></tr>
+      </table>
+      <p>时间上，<strong>清晨六点到九点</strong>和<strong>傍晚四点到七点</strong>是黄金窗口：光线柔和、店铺刚开或将关，城市处在「换班」的状态，比正午有意思得多。</p>
+
+      <h2 id="s3">路线从哪里来</h2>
+      <p>不要做完美规划。我的经验是「<a href="#">三分规划，七分迷路</a>」：</p>
+      <ul>
+        <li>选一个<strong>锚点</strong>出发：老火车站、桥头、市场，任何有历史感的地方；</li>
+        <li>沿着<strong>河流或铁路</strong>走：它们是城市生长的骨架，沿线信息密度最高；</li>
+        <li>每到一个路口，允许自己<strong>随机转向</strong>一次——迷路是漫步的精髓；</li>
+        <li>控制在 <code>5–8 公里</code>之间，超过这个距离，观察会退化为赶路。</li>
+      </ul>
+      <figure>
+        <img src="https://picsum.photos/seed/artroute/1200/640" alt="沿河步道" loading="lazy">
+        <figcaption>图 1 · 沿河步道是最稳妥的入门路线，信息密度高且不会迷路</figcaption>
+      </figure>
+
+      <h2 id="s4">路上的观察法</h2>
+      <p>漫无目的地走容易变成「刷步数」。给自己一个简单的观察框架，收获会完全不同：</p>
+      <ol>
+        <li><strong>看层积</strong>：同一栋楼上的空调外机、招牌、防盗网，分别属于哪个年代？</li>
+        <li><strong>听声音</strong>：关掉耳机走 500 米，你能分辨出几种声音？</li>
+        <li><strong>找边界</strong>：哪条街是「这边」和「那边」的分界？租金、口音、树种往往在一条街内突变。</li>
+        <li><strong>记异常</strong>：所有「不应该出现在这里」的东西，都是故事的入口。</li>
+      </ol>
+      <blockquote>我在老城区见过一家开在祠堂旁边的滑板店，老板说选这里是因为「爷爷的牌位在这，滑板的未来也在这」。这句话我记了两年。</blockquote>
+
+      <h2 id="s5">把路线记录下来</h2>
+      <p>如果你想把路线分享给朋友，或者做成系列内容，<code>GPX</code> 是最通用的轨迹格式。下面是一段最小可用的结构，手机轨迹 App 导出的文件本质上就是它：</p>
+      <div class="code-block">
+        <div class="cb-head"><span>route.gpx · XML</span><button id="copyBtn">复制代码</button></div>
+<pre><span class="c">&lt;!-- 一次 5.2km 的沿河漫步轨迹 --&gt;</span>
+&lt;<span class="k">gpx</span> version=<span class="s">"1.1"</span> creator=<span class="s">"shanxing-notes"</span>&gt;
+  &lt;<span class="k">trk</span>&gt;
+    &lt;<span class="k">name</span>&gt;沿河步道 · 清晨线&lt;/<span class="k">name</span>&gt;
+    &lt;<span class="k">trkseg</span>&gt;
+      &lt;<span class="k">trkpt</span> lat=<span class="s">"23.1291"</span> lon=<span class="s">"113.2644"</span>&gt;&lt;<span class="k">ele</span>&gt;21&lt;/<span class="k">ele</span>&gt;&lt;/<span class="k">trkpt</span>&gt;
+      &lt;<span class="k">trkpt</span> lat=<span class="s">"23.1305"</span> lon=<span class="s">"113.2661"</span>&gt;&lt;<span class="k">ele</span>&gt;19&lt;/<span class="k">ele</span>&gt;&lt;/<span class="k">trkpt</span>&gt;
+    &lt;/<span class="k">trkseg</span>&gt;
+  &lt;/<span class="k">trk</span>&gt;
+&lt;/<span class="k">gpx</span>&gt;</pre>
+      </div>
+      <p>配合 <code>leaflet</code> 或任何地图 SDK，十几行代码就能把轨迹渲染出来。技术不是目的，但它让「那条路很好走」这句话变得可以传递。</p>
+
+      <h2 id="s6">写在最后</h2>
+      <p>城市漫步最妙的地方在于：它不需要任何门槛，却永远有下一次。同一条街，换一个月份、换一种天气、换一个同行的人，就是全新的路线。</p>
+      <p>这个周末，挑一个你没去过的地铁站下车，随便选一个出口。剩下的，交给街道本身。</p>
+    </article>
+
+    <div class="author-card">
+      <span class="ava">山</span>
+      <div>
+        <h4>山行</h4>
+        <p>城市观察者，业余徒步爱好者。相信最好的城市规划评论写在人行道上。已更新 87 篇路书与城市笔记。</p>
+      </div>
+    </div>
+
+    <section class="comments">
+      <h3>评论（3）</h3>
+      <div id="cList">
+        <div class="c-item"><span class="ava" style="background:#b3543a">陆</span><div><h5>陆知行<span>3 天前</span></h5><p>沿着文中说的沿河步道走了一次，果然在桥洞下发现了一个开了二十年的修车摊。老板说以前这里是渡口。</p></div></div>
+        <div class="c-item"><span class="ava" style="background:#3a6fb3">温</span><div><h5>温以凡<span>1 天前</span></h5><p>「三分规划七分迷路」太对了，上周迷路误入一个老居民区的天台花园，阿姨还分了我两个橘子。</p></div></div>
+        <div class="c-item"><span class="ava" style="background:#7a4db3">裴</span><div><h5>裴野<span>5 小时前</span></h5><p>求 GPX 渲染的完整代码！另外建议加一条：雨天漫步记得带伞，别问我怎么知道的。</p></div></div>
+      </div>
+      <div class="c-form">
+        <input id="cName" placeholder="昵称" maxlength="12">
+        <textarea id="cText" placeholder="说点什么……"></textarea>
+        <button id="cSubmit">发表评论</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<button id="toTop">↑</button>
+<script>
+/* ---------- 阅读进度 + 回顶 ---------- */
+const progress = document.getElementById('progress');
+const toTop = document.getElementById('toTop');
+addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const p = h.scrollTop / (h.scrollHeight - h.clientHeight);
+  progress.style.width = (p * 100) + '%';
+  toTop.classList.toggle('show', h.scrollTop > 600);
+}, {passive:true});
+toTop.addEventListener('click', () => scrollTo({top:0, behavior:'smooth'}));
+
+/* ---------- TOC 滚动监听 ---------- */
+const tocLinks = [...document.querySelectorAll('.toc a')];
+const sections = tocLinks.map(a => document.getElementById(a.dataset.t));
+const spy = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (e.isIntersecting){
+      tocLinks.forEach(a => a.classList.toggle('on', a.dataset.t === e.target.id));
+    }
+  });
+}, {rootMargin:'-80px 0px -60% 0px'});
+sections.forEach(s => spy.observe(s));
+tocLinks.forEach(a => a.addEventListener('click', () =>
+  document.getElementById(a.dataset.t).scrollIntoView({behavior:'smooth'})));
+
+/* ---------- 代码复制 ---------- */
+document.getElementById('copyBtn').addEventListener('click', function(){
+  const code = document.querySelector('.code-block pre').innerText;
+  navigator.clipboard?.writeText(code).then(() => {
+    this.textContent = '已复制 ✓';
+    setTimeout(() => this.textContent = '复制代码', 1600);
+  }).catch(() => { this.textContent = '复制失败'; });
+});
+
+/* ---------- 发表评论 ---------- */
+const COLORS = ['#1f6f54','#b3543a','#3a6fb3','#a8842c','#7a4db3'];
+document.getElementById('cSubmit').addEventListener('click', () => {
+  const name = document.getElementById('cName').value.trim() || '匿名访客';
+  const text = document.getElementById('cText').value.trim();
+  if (!text) return;
+  const el = document.createElement('div');
+  el.className = 'c-item';
+  el.style.opacity = 0; el.style.transform = 'translateY(10px)';
+  el.innerHTML = `<span class="ava" style="background:${COLORS[Math.floor(Math.random()*COLORS.length)]}">${name[0]}</span>
+    <div><h5>${name.replace(/</g,'&lt;')}<span>刚刚</span></h5><p>${text.replace(/</g,'&lt;')}</p></div>`;
+  document.getElementById('cList').appendChild(el);
+  requestAnimationFrame(() => { el.style.transition = '.4s'; el.style.opacity = 1; el.style.transform = 'none'; });
+  document.getElementById('cText').value = '';
+});
+</script>
+</body>
+</html>
